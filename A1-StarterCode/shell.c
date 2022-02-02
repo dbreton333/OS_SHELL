@@ -60,7 +60,7 @@ int parseInput(char ui[]) {
 
 		words[w] = strdup(tmp);
 		if(ui[a] == '\0'){
-    	break;
+    		break;
 		}
 		a++; 
 		w++;

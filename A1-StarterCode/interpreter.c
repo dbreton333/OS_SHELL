@@ -5,7 +5,7 @@
 #include "shellmemory.h"
 #include "shell.h"
 
-int MAX_ARGS_SIZE = 7; //7 for set command 5 + 2
+int MAX_ARGS_SIZE = 7; //7 for set command 2 (Command + Var) + 5 (maximum number of arguments)
 
 int help();
 int quit();
@@ -19,11 +19,23 @@ int badcommandTooManyTokens();
 // Interpret commands and their arguments
 int interpreter(char* command_args[], int args_size){
 	int i;
-
+	
 	if ( args_size < 1){
-		return badcommand();
-	}
+		char userInput[MAX_USER_INPUT];		// user's input stored here
+		int errorCode = 0;					// zero means no error, default
 
+		for (int i=0; i<MAX_USER_INPUT; i++) //init user input
+		userInput[i] = '\0';
+
+		freopen("/dev/tty", "r", stdin);
+
+		fgets(userInput, MAX_USER_INPUT-1, stdin);
+		errorCode = parseInput(userInput);
+		if (errorCode == -1) exit(99);	// ignore all other errors
+		memset(userInput, 0, sizeof(userInput));
+
+		return errorCode;
+	}
 
 	for ( i=0; i<args_size; i++){ //strip spaces new line etc
 		command_args[i][strcspn(command_args[i], "\r\n")] = 0;
@@ -41,13 +53,14 @@ int interpreter(char* command_args[], int args_size){
 
 	} else if (strcmp(command_args[0], "set")==0) {
 		//set
-		if (args_size > 7) return badcommandTooManyTokens();
-		char concatArgs[700];
+		if (args_size > 7) return badcommandTooManyTokens(); //2 (Command + Var) + 5 (maximum number of arguments)
+		if (args_size < 3) return badcommand();
+		char concatArgs[700]; //all tokens concat together
 		char *space = " ";
 		strcpy(concatArgs, command_args[2]);
 		for (int j = 3; j<args_size; j++){
-			strcat(concatArgs, space);
-			strcat(concatArgs, command_args[j]);
+			strcat(concatArgs, space); // add spaces between tokens
+			strcat(concatArgs, command_args[j]); // add token
 		}
 		return set(command_args[1], concatArgs);
 	

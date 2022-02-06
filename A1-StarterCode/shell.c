@@ -59,11 +59,11 @@ int parseInput(char ui[]) {
 		tmp[b] = '\0';
 
 		words[w] = strdup(tmp);
+		w++;
 		if(ui[a] == '\0'){
     		break;
 		}
 		a++; 
-		w++;
 	}
 
 	return interpreter(words, w);

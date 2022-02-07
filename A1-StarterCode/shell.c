@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
 				errorCode = parseInput(liToken[j]);
 				if (errorCode == -1) exit(99);	// ignore all other errors
 				memset(userInput, 0, sizeof(liToken[j]));
+				free(liToken[j]); 
 				j++;
 			}
 		}else{
@@ -59,6 +60,7 @@ int main(int argc, char *argv[]) {
 			if (errorCode == -1) exit(99);	// ignore all other errors
 			memset(userInput, 0, sizeof(userInput));	
 		}
+		free(liToken);
 	}
 
 

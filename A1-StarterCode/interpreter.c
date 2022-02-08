@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h> 
 
+
 #include "shellmemory.h"
 #include "shell.h"
 
@@ -16,6 +17,7 @@ int run(char* script);
 int badcommandFileDoesNotExist();
 int badcommandTooManyTokens();
 int echo(char* var);
+int my_ls();
 
 // Interpret commands and their arguments
 int interpreter(char* command_args[], int args_size){
@@ -64,6 +66,11 @@ int interpreter(char* command_args[], int args_size){
 		
 		if (args_size != 2) return badcommand();
 		return echo(command_args[1]);
+
+	} else if (strcmp(command_args[0], "my_ls")==0) {
+		
+		if (args_size != 1) return badcommand();
+		return my_ls();
 
 	} else return badcommand();
 }
@@ -121,15 +128,27 @@ int print(char* var){
 }
 
 int echo(char* var){
+	//checking if first char is $
 	if (var[0] == '$'){
+		//if yes remove it
 		char* v = &var[1];
-	
+		//check if the variable exist
 		if (strcmp (v , "Variable does not exist")==0){
 			printf("\n");
 		}
+		//if it does display value
 		else print(v);
 	}
+	//if no $ just print/echo variable
 	else printf("%s\n", var);
+
+	return 0;
+}
+
+int my_ls(){
+	//calling system to output ls in a vertical way
+	system("ls -1");
+   return(0);
 }
 
 int run(char* script){

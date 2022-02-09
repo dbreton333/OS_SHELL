@@ -30,12 +30,39 @@ int main(int argc, char *argv[]) {
 	while(1) {							
 		printf("%c ",prompt);
 		fgets(userInput, MAX_USER_INPUT-1, stdin);
+		char* token;
+		char** liToken =  malloc(10 * sizeof(char*));;
+		int i = 0;
 
-		errorCode = parseInput(userInput);
-		if (errorCode == -1) exit(99);	// ignore all other errors
-		memset(userInput, 0, sizeof(userInput));
+		if(strchr(userInput, ';') != NULL){
+	
+			token = strtok(userInput, ";");
 
+			while( token != NULL ) {
+				liToken[i] = malloc(200);
+				strcpy(liToken[i], token);
+				token = strtok(NULL, ";");
+				i++;
+			}
+
+			int j = 0;
+			
+			while( liToken[j] != NULL){
+				errorCode = parseInput(liToken[j]);
+				if (errorCode == -1) exit(99);	// ignore all other errors
+				memset(userInput, 0, sizeof(liToken[j]));
+				free(liToken[j]); 
+				j++;
+			}
+		}else{
+
+			errorCode = parseInput(userInput);
+			if (errorCode == -1) exit(99);	// ignore all other errors
+			memset(userInput, 0, sizeof(userInput));	
+		}
+		free(liToken);
 	}
+
 
 	return 0;
 
@@ -49,22 +76,29 @@ int parseInput(char ui[]) {
 	int a,b;							
 	int w=0; // wordID
 
-	for(a=0; ui[a]==' ' && a<1000; a++);		// skip white spaces
-
+	for(a=0; ui[a]==' ' && a<1000; a++);
+	
+	// skip white spaces
 	while(ui[a] != '\0' && a<1000) {
 
-		for(b=0; ui[a]!='\0' && ui[a]!=' ' && a<1000; a++, b++)
+		for(a; ui[a]==' '; a++);
+
+		for(b=0; ui[a]!='\0' && ui[a]!=' ' && ui[a] && a<1000; a++, b++)
 			tmp[b] = ui[a];						// extract a word
 	 
 		tmp[b] = '\0';
 
 		words[w] = strdup(tmp);
+
 		w++;
+
 		if(ui[a] == '\0'){
     		break;
 		}
+
 		a++; 
 	}
+
 
 	return interpreter(words, w);
 }

@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
 		char** liToken =  malloc(10 * sizeof(char*));;
 		int i = 0;
 
+		//online mode -> checks if there is the symbole ;
 		if(strchr(userInput, ';') != NULL){
 	
 			token = strtok(userInput, ";");
@@ -48,6 +49,7 @@ int main(int argc, char *argv[]) {
 			int j = 0;
 			
 			while( liToken[j] != NULL){
+				//parseInput for every instruction
 				errorCode = parseInput(liToken[j]);
 				if (errorCode == -1) exit(99);	// ignore all other errors
 				memset(userInput, 0, sizeof(liToken[j]));

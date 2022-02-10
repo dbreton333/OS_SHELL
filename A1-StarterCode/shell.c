@@ -82,7 +82,8 @@ int parseInput(char ui[]) {
 	
 	// skip white spaces
 	while(ui[a] != '\0' && a<1000) {
-
+		
+		//get rid of spaces
 		for(a; ui[a]==' '; a++);
 
 		for(b=0; ui[a]!='\0' && ui[a]!=' ' && ui[a] && a<1000; a++, b++)

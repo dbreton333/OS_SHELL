@@ -23,6 +23,7 @@ int my_ls();
 int interpreter(char* command_args[], int args_size){
 	int i;
 	
+	//switch from batch mode to interactive mode when the file reaches the end
 	if ( args_size < 1){
 		char userInput[MAX_USER_INPUT];		// user's input stored here
 		int errorCode = 0;					// zero means no error, default
@@ -30,7 +31,7 @@ int interpreter(char* command_args[], int args_size){
 		for (int i=0; i<MAX_USER_INPUT; i++) //init user input
 		userInput[i] = '\0';
 
-		freopen("/dev/tty", "r", stdin);
+		freopen("/dev/tty", "r", stdin); //change to interactive mode
 
 		fgets(userInput, MAX_USER_INPUT-1, stdin);
 		errorCode = parseInput(userInput);
@@ -56,15 +57,20 @@ int interpreter(char* command_args[], int args_size){
 
 	} else if (strcmp(command_args[0], "set")==0) {
 		//set
+		
+		//test
 		if (args_size > 7) return badcommandTooManyTokens(); //2 (Command + Var) + 5 (maximum number of arguments)
-		if (args_size < 3) return badcommand();
-		char concatArgs[700]; //all tokens concat together
+		if (args_size < 3) return badcommand(); //if the variable is set to nothing
+		
+		//concat all the tokens together
+		char concatArgs[700]; 
 		char *space = " ";
 		strcpy(concatArgs, command_args[2]);
 		for (int j = 3; j<args_size; j++){
 			strcat(concatArgs, space); // add spaces between tokens
 			strcat(concatArgs, command_args[j]); // add token
 		}
+		
 		return set(command_args[1], concatArgs);
 	
 	} else if (strcmp(command_args[0], "print")==0) {

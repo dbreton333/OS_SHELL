@@ -19,6 +19,16 @@ int badcommandTooManyTokens();
 int echo(char* var);
 int my_ls();
 
+struct PCB *head;
+
+struct PCB {
+	int PID;
+	int base;
+	int PC;
+	int length;
+	struct PCB *next;
+};
+
 // Interpret commands and their arguments
 int interpreter(char* command_args[], int args_size){
 	int i;
@@ -173,22 +183,51 @@ int my_ls(){
 int run(char* script){
 	int errCode = 0;
 	char line[1000];
+	int var = 0;
+	int size = 0;
 	FILE *p = fopen(script,"rt");  // the program is in a file
+
+	struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB));
+
 
 	if(p == NULL){
 		return badcommandFileDoesNotExist();
 	}
 
+	pcb->base = var;
+	pcb->PC = var;
+	pcb->next = NULL;
+
 	fgets(line,999,p);
 	while(1){
-		errCode = parseInput(line);	// which calls interpreter()
-		memset(line, 0, sizeof(line));
 
 		if(feof(p)){
 			break;
 		}
+
+		char buffer[4];
+		sprintf(buffer,"%d",var);
+
+		//errCode = parseInput(line);	// which calls interpreter()
+		set(buffer, line);
+		//memset(line, 0, sizeof(line));
+		var++;
+		size++;
+
+
+
 		fgets(line,999,p);
 	}
+
+	pcb->length = size;
+
+	for (int i = pcb->base; i <= size; i++)
+	{
+		char index[4];
+		sprintf(index,"%d",i);
+		errCode = parseInput(mem_get_value(index));
+	}
+	
 
     fclose(p);
 

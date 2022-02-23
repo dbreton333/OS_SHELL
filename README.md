@@ -1,15 +1,15 @@
-#OS Project
+## OS Project
 
 David Breton 260986087
 
 Tsemach Gozlan 260987791
 
-## OS_SHELL
+### OS_SHELL
 Assignement 1 basic OS shell
 
 We did use the starter code provided by the OS team.
 
-## Multi-Process Scheduler
+### Multi-Process Scheduler
 Assignement 2
 
 • Implement the scheduling infrastructure.

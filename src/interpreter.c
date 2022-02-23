@@ -199,11 +199,8 @@ int run(char* script){
 	pcb->next = NULL;
 
 	fgets(line,999,p);
-	while(1){
 
-		if(feof(p)){
-			break;
-		}
+	while(1){
 
 		char buffer[4];
 		sprintf(buffer,"%d",var);
@@ -215,13 +212,16 @@ int run(char* script){
 		size++;
 
 
+		if(feof(p)){
+			break;
+		}
 
 		fgets(line,999,p);
 	}
 
 	pcb->length = size;
 
-	for (int i = pcb->base; i <= size; i++)
+	for (int i = pcb->base; i < size; i++)
 	{
 		char index[4];
 		sprintf(index,"%d",i);

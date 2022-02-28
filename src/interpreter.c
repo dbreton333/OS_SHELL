@@ -24,6 +24,9 @@ int help();
 int quit();
 int badcommand();
 int FCFS();
+int RR();
+int AGING();
+int SJF();
 int set(char* var, char* value);
 int print(char* var);
 int run(char* script);
@@ -266,16 +269,30 @@ int scheduler(char *policy){
 	if(strcmp(policy,"FCFS") == 0){
 		return FCFS();
 	}else if(strcmp(policy,"SJF") == 0){
-		return 0;
+		return SJF();
 	}else if(strcmp(policy,"RR") == 0){
-		return 0;
+		return RR();
 	}else if(strcmp(policy,"AGING") == 0){
-		return 0;
+		return AGING();
 	}else{
 		return badcommandNoSuchPolicy();
 	}
 }
 
+int SJF(){
+
+	return 0; //for compilation
+}
+
+int RR(){
+
+	return 0; //for compilation
+}
+
+int AGING(){
+
+	return 0; //for compilation
+}
 int FCFS(){
 	int errCode = 0;
 	struct PCB* pcb = tail;

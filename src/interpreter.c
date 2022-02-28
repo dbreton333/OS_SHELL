@@ -151,12 +151,6 @@ int badcommand(){
 	return 1;
 }
 
-// For run command only
-int badcommandFileDoesNotExist(){
-	printf("%s\n", "Bad command: File not found");
-	return 3;
-}
-
 int badcommandDigitVariable(){
 	printf("%s\n", "Connot have a integer as a variable");
 	return 1;
@@ -165,6 +159,12 @@ int badcommandDigitVariable(){
 int badcommandTooManyTokens(){
 	printf("%s\n", "Bad command: Too many Tokens");
 	return 2;
+}
+
+// For run command only
+int badcommandFileDoesNotExist(){
+	printf("%s\n", "Bad command: File not found");
+	return 3;
 }
 
 int badcommandNoSuchPolicy(){
@@ -217,13 +217,15 @@ int my_ls(){
 
 int run(char* script){
 	int errCode = 0;
-	char line[1000];
-	int var = 0;
-	int size = 0;
-	FILE *p = fopen(script,"rt");  // the program is in a file
 
-	struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB));
-	tail = pcb;
+	char line[1000]; //buffer for line
+	int var = 0; //line number
+	int size = 0; //size of program
+	FILE *p = fopen(script,"rt");  // open file and p points to it
+
+	struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
+	head = pcb; //set head
+	tail = pcb; //set tail
 
 	if(p == NULL){
 		return badcommandFileDoesNotExist();
@@ -240,27 +242,29 @@ int run(char* script){
 
 	while(1){
 
-		char buffer[4];
-		sprintf(buffer,"%d",var);
+		char buffer[4]; //string buffer for integer conversion
+		sprintf(buffer,"%d",var); //copy integer as a string ex: 1 -> "1"
 
-		//errCode = parseInput(line);	// which calls interpreter()
-		set(buffer, line);
-		//memset(line, 0, sizeof(line));
-		var++;
-		size++;
+		set(buffer, line); //set line to line number as variable
+	
+		var++; //increment line number
+		size++; //increment size of program
 
-
+		//if end of file break
 		if(feof(p)){
 			break;
 		}
 
+		//get next line
 		fgets(line,999,p);
 	}
 
+	//set length of program to size
 	pcb->length = size;
 
 	errCode = scheduler("FCFS");
 
+	//close file
 	fclose(p);
 	return errCode;
 }
@@ -336,6 +340,7 @@ int FCFS(){
 			}
 			free(liToken);
 		}
+		//clear pcb when pcb reaches the end
 		PCB_clear(pcb);
 		pcb = pcb->back;
 	}
@@ -349,5 +354,29 @@ int PCB_clear(struct PCB* pcb){
  for(int i = pcb->base; i < pcb->length; i++){
 	sprintf(index,"%d",i);
 	mem_clear(index);
+ }
+
+ if(pcb->back != NULL){
+	 if(pcb->next != NULL){
+	 	pcb->back->next = pcb->next;
+	 }else{
+		pcb->back->next = NULL;
+	 }
+ }
+
+ if(pcb->next != NULL){
+	 if(pcb->back != NULL){
+		 pcb->next->back = pcb->back;
+	 }else{
+		 pcb->next->back = NULL;
+	 }
+ }
+
+ if(head == pcb){
+	 head = pcb->next;
+ }
+
+ if(tail == pcb){
+	 tail == pcb->back;
  }
 }

@@ -223,9 +223,42 @@ int run(char* script){
 
 	for (int i = pcb->base; i < size; i++)
 	{
-		char index[4];
+		char index[4];	
 		sprintf(index,"%d",i);
-		errCode = parseInput(mem_get_value(index));
+		char* userInput = mem_get_value(index);
+		char* token;
+		char** liToken =  malloc(10 * sizeof(char*));;
+		int k = 0;
+
+		//online mode -> checks if there is the symbole ;
+		if(strchr(userInput, ';') != NULL){
+	
+			token = strtok(userInput, ";");
+
+			while( token != NULL ) {
+				liToken[k] = malloc(200);
+				strcpy(liToken[k], token);
+				token = strtok(NULL, ";");
+				k++;
+			}
+
+			int j = 0;
+			
+			while( liToken[j] != NULL){
+				//parseInput for every instruction
+				errCode = parseInput(liToken[j]);
+				if (errCode == -1) exit(99);	// ignore all other errors
+				memset(liToken[j], 0, sizeof(liToken[j]));
+				free(liToken[j]); 
+				j++;
+			}
+		}else{
+
+			errCode = parseInput(userInput);
+			if (errCode == -1) exit(99);	// ignore all other errors
+			memset(userInput, 0, sizeof(userInput));	
+		}
+		free(liToken);
 	}
 	
 

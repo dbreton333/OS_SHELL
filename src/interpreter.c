@@ -15,6 +15,7 @@ struct PCB {
 	int PC;
 	int length;
 	struct PCB *next;
+	struct PCB *back;
 };
 
 int MAX_ARGS_SIZE = 7; //7 for set command 2 (Command + Var) + 5 (maximum number of arguments)
@@ -22,12 +23,14 @@ int MAX_ARGS_SIZE = 7; //7 for set command 2 (Command + Var) + 5 (maximum number
 int help();
 int quit();
 int badcommand();
+int FCFS();
 int set(char* var, char* value);
 int print(char* var);
 int run(char* script);
 int badcommandDigitVariable();
 int badcommandFileDoesNotExist();
-int scheduler();
+int badcommandNoSuchPolicy();
+int scheduler(char *policy);
 int badcommandTooManyTokens();
 int PCB_clear(struct PCB* pcb);
 int echo(char* var);
@@ -161,6 +164,11 @@ int badcommandTooManyTokens(){
 	return 2;
 }
 
+int badcommandNoSuchPolicy(){
+	printf("%s\n", "Bad command: No such policy. Chose betweem FCFS, RR, SJF and AGING");
+	return 1;
+}
+
 int set(char* var, char* value){
 
 	char *link = "=";
@@ -223,6 +231,7 @@ int run(char* script){
 	pcb->next = NULL;
 	pcb->PID = PID_temp;
 	PID_temp++;
+	pcb->back = NULL;
 
 	fgets(line,999,p);
 
@@ -247,55 +256,72 @@ int run(char* script){
 
 	pcb->length = size;
 
-	errCode = scheduler();
+	errCode = scheduler("FCFS");
 
 	fclose(p);
 	return errCode;
 }
 
-int scheduler(){
+int scheduler(char *policy){
+	if(strcmp(policy,"FCFS") == 0){
+		return FCFS();
+	}else if(strcmp(policy,"SJF") == 0){
+		return 0;
+	}else if(strcmp(policy,"RR") == 0){
+		return 0;
+	}else if(strcmp(policy,"AGING") == 0){
+		return 0;
+	}else{
+		return badcommandNoSuchPolicy();
+	}
+}
+
+int FCFS(){
 	int errCode = 0;
 	struct PCB* pcb = tail;
 
-	for (int i = pcb->PC; i < pcb->length ; i++){
-		char index[4];	
-		sprintf(index,"%d",i);
-		char* userInput = mem_get_value(index);
-		char* token;
-		char** liToken =  malloc(10 * sizeof(char*));;
-		int k = 0;
+	while(pcb != NULL){
+		for (int i = pcb->PC; i < pcb->length ; i++){
+			char index[4];	
+			sprintf(index,"%d",i);
+			char* userInput = mem_get_value(index);
+			char* token;
+			char** liToken =  malloc(10 * sizeof(char*));;
+			int k = 0;
 
-		//online mode -> checks if there is the symbole ;
-		if(strchr(userInput, ';') != NULL){
-	
-			token = strtok(userInput, ";");
+			//online mode -> checks if there is the symbole ;
+			if(strchr(userInput, ';') != NULL){
+		
+				token = strtok(userInput, ";");
 
-			while( token != NULL ) {
-				liToken[k] = malloc(200);
-				strcpy(liToken[k], token);
-				token = strtok(NULL, ";");
-				k++;
-			}
+				while( token != NULL ) {
+					liToken[k] = malloc(200);
+					strcpy(liToken[k], token);
+					token = strtok(NULL, ";");
+					k++;
+				}
 
-			int j = 0;
-			
-			while( liToken[j] != NULL){
-				//parseInput for every instruction
-				errCode = parseInput(liToken[j]);
+				int j = 0;
+				
+				while( liToken[j] != NULL){
+					//parseInput for every instruction
+					errCode = parseInput(liToken[j]);
+					if (errCode == -1) exit(99);	// ignore all other errors
+					memset(liToken[j], 0, sizeof(liToken[j]));
+					free(liToken[j]); 
+					j++;
+				}
+			}else{
+
+				errCode = parseInput(userInput);
 				if (errCode == -1) exit(99);	// ignore all other errors
-				memset(liToken[j], 0, sizeof(liToken[j]));
-				free(liToken[j]); 
-				j++;
+				memset(userInput, 0, sizeof(userInput));	
 			}
-		}else{
-
-			errCode = parseInput(userInput);
-			if (errCode == -1) exit(99);	// ignore all other errors
-			memset(userInput, 0, sizeof(userInput));	
+			free(liToken);
 		}
-		free(liToken);
+		PCB_clear(pcb);
+		pcb = pcb->back;
 	}
-	PCB_clear(pcb);
 	return errCode;
 }
 

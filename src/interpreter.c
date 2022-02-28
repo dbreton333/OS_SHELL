@@ -6,20 +6,8 @@
 #include "shellmemory.h"
 #include "shell.h"
 
-int MAX_ARGS_SIZE = 7; //7 for set command 2 (Command + Var) + 5 (maximum number of arguments)
-
-int help();
-int quit();
-int badcommand();
-int set(char* var, char* value);
-int print(char* var);
-int run(char* script);
-int badcommandFileDoesNotExist();
-int badcommandTooManyTokens();
-int echo(char* var);
-int my_ls();
-
 struct PCB *head;
+struct PCB *tail;
 
 struct PCB {
 	int PID;
@@ -28,6 +16,23 @@ struct PCB {
 	int length;
 	struct PCB *next;
 };
+
+int MAX_ARGS_SIZE = 7; //7 for set command 2 (Command + Var) + 5 (maximum number of arguments)
+
+int help();
+int quit();
+int badcommand();
+int set(char* var, char* value);
+int print(char* var);
+int run(char* script);
+int badcommandDigitVariable();
+int badcommandFileDoesNotExist();
+int scheduler();
+int badcommandTooManyTokens();
+int PCB_clear(struct PCB* pcb);
+int echo(char* var);
+int my_ls();
+int PID_temp = 0;
 
 // Interpret commands and their arguments
 int interpreter(char* command_args[], int args_size){
@@ -71,6 +76,20 @@ int interpreter(char* command_args[], int args_size){
 		//test
 		if (args_size > 7) return badcommandTooManyTokens(); //2 (Command + Var) + 5 (maximum number of arguments)
 		if (args_size < 3) return badcommand(); //if the variable is set to nothing
+		char tmp[16];
+		sscanf(command_args[1],"%s", tmp);
+		//check if variable is an integer
+		int isDigit = 1;
+		int j=0;
+
+		while(j<strlen(tmp) && isDigit == 1){
+			if(tmp[j] <= '0' || tmp[j] >='9'){
+				isDigit = 0;
+			}
+			j++;
+		}
+
+		if(isDigit == 1) return badcommandDigitVariable();			
 		
 		//concat all the tokens together
 		char concatArgs[700]; 
@@ -132,6 +151,11 @@ int badcommandFileDoesNotExist(){
 	return 3;
 }
 
+int badcommandDigitVariable(){
+	printf("%s\n", "Connot have a integer as a variable");
+	return 1;
+}
+
 int badcommandTooManyTokens(){
 	printf("%s\n", "Bad command: Too many Tokens");
 	return 2;
@@ -188,7 +212,7 @@ int run(char* script){
 	FILE *p = fopen(script,"rt");  // the program is in a file
 
 	struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB));
-
+	tail = pcb;
 
 	if(p == NULL){
 		return badcommandFileDoesNotExist();
@@ -197,6 +221,8 @@ int run(char* script){
 	pcb->base = var;
 	pcb->PC = var;
 	pcb->next = NULL;
+	pcb->PID = PID_temp;
+	PID_temp++;
 
 	fgets(line,999,p);
 
@@ -221,8 +247,17 @@ int run(char* script){
 
 	pcb->length = size;
 
-	for (int i = pcb->base; i < size; i++)
-	{
+	errCode = scheduler();
+
+	fclose(p);
+	return errCode;
+}
+
+int scheduler(){
+	int errCode = 0;
+	struct PCB* pcb = tail;
+
+	for (int i = pcb->PC; i < pcb->length ; i++){
 		char index[4];	
 		sprintf(index,"%d",i);
 		char* userInput = mem_get_value(index);
@@ -260,9 +295,16 @@ int run(char* script){
 		}
 		free(liToken);
 	}
-	
-
-    fclose(p);
-
+	PCB_clear(pcb);
 	return errCode;
+}
+
+int PCB_clear(struct PCB* pcb){
+ //clear the PCB in the shell memory
+ //remove PCB from QUEUE
+ char index[4];	
+ for(int i = pcb->base; i < pcb->length; i++){
+	sprintf(index,"%d",i);
+	mem_clear(index);
+ }
 }

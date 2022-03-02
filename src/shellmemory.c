@@ -69,6 +69,15 @@ void mem_set_value(char *var_in, char *value_in) {
 
 }
 
+void mem_clear(char *var_in){
+	for (int i=0; i<1000; i++){
+		if (strcmp(shellmemory[i].var, var_in) == 0){
+			shellmemory[i].var = strdup("none");
+			return;
+		} 
+	}
+}
+
 //get value based on input key
 char *mem_get_value(char *var_in) {
 	int i;

@@ -5,19 +5,34 @@
 
 #include "shellmemory.h"
 #include "shell.h"
+#include "scheduler.h"
+
+
+
+struct PCB *head;
+struct PCB *tail;
 
 int MAX_ARGS_SIZE = 7; //7 for set command 2 (Command + Var) + 5 (maximum number of arguments)
 
 int help();
 int quit();
 int badcommand();
+int FCFS();
+int RR();
+int AGING();
+int SJF();
 int set(char* var, char* value);
 int print(char* var);
 int run(char* script);
+int badcommandDigitVariable();
 int badcommandFileDoesNotExist();
+int badcommandNoSuchPolicy();
+int scheduler(char *policy);
 int badcommandTooManyTokens();
+int PCB_clear(struct PCB* pcb);
 int echo(char* var);
 int my_ls();
+int PID_temp = 0;
 
 // Interpret commands and their arguments
 int interpreter(char* command_args[], int args_size){
@@ -61,6 +76,20 @@ int interpreter(char* command_args[], int args_size){
 		//test
 		if (args_size > 7) return badcommandTooManyTokens(); //2 (Command + Var) + 5 (maximum number of arguments)
 		if (args_size < 3) return badcommand(); //if the variable is set to nothing
+		char tmp[16];
+		sscanf(command_args[1],"%s", tmp);
+		//check if variable is an integer
+		int isDigit = 1;
+		int j=0;
+
+		while(j<strlen(tmp) && isDigit == 1){
+			if(tmp[j] <= '0' || tmp[j] >='9'){
+				isDigit = 0;
+			}
+			j++;
+		}
+
+		if(isDigit == 1) return badcommandDigitVariable();			
 		
 		//concat all the tokens together
 		char concatArgs[700]; 
@@ -91,7 +120,22 @@ int interpreter(char* command_args[], int args_size){
 		if (args_size != 1) return badcommand();
 		return my_ls();
 
-	} else return badcommand();
+	} else if (strcmp(command_args[0], "exec")==0) {
+	
+		if (args_size > 5) return badcommand();
+		char *programs[args_size-1];
+
+		for(int i = 1 ; i < args_size - 1 ; i++){
+			printf("in exec %s \n", command_args[i]);
+
+			strcpy(programs[i-1],command_args[i]) ;
+			printf("in pro %s \n", programs[i-1]);
+		}
+		printf("after  %s \n", command_args[i]);
+		
+		return exec(programs, command_args[i]);
+	}
+	else return badcommand();
 }
 
 int help(){
@@ -116,15 +160,25 @@ int badcommand(){
 	return 1;
 }
 
+int badcommandDigitVariable(){
+	printf("%s\n", "Connot have a integer as a variable");
+	return 1;
+}
+
+int badcommandTooManyTokens(){
+	printf("%s\n", "Bad command: Too many Tokens");
+	return 2;
+}
+
 // For run command only
 int badcommandFileDoesNotExist(){
 	printf("%s\n", "Bad command: File not found");
 	return 3;
 }
 
-int badcommandTooManyTokens(){
-	printf("%s\n", "Bad command: Too many Tokens");
-	return 2;
+int badcommandNoSuchPolicy(){
+	printf("%s\n", "Bad command: No such policy. Chose betweem FCFS, RR, SJF and AGING");
+	return 1;
 }
 
 int set(char* var, char* value){
@@ -172,25 +226,126 @@ int my_ls(){
 
 int run(char* script){
 	int errCode = 0;
-	char line[1000];
-	FILE *p = fopen(script,"rt");  // the program is in a file
+
+	char line[1000]; //buffer for line
+	int var = 0; //line number
+	int size = 0; //size of program
+	FILE *p = fopen(script,"rt");  // open file and p points to it
+
+	struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
+	head = pcb; //set head
+	tail = pcb; //set tail
 
 	if(p == NULL){
 		return badcommandFileDoesNotExist();
 	}
 
-	fgets(line,999,p);
-	while(1){
-		errCode = parseInput(line);	// which calls interpreter()
-		memset(line, 0, sizeof(line));
+	pcb->base = var;
+	pcb->PC = var;
+	pcb->next = NULL;
+	pcb->PID = PID_temp;
+	PID_temp++;
+	pcb->back = NULL;
 
+	fgets(line,999,p);
+
+	while(1){
+
+		char buffer[4]; //string buffer for integer conversion
+		sprintf(buffer,"%d",var); //copy integer as a string ex: 1 -> "1"
+
+		set(buffer, line); //set line to line number as variable
+	
+		var++; //increment line number
+		size++; //increment size of program
+
+		//if end of file break
 		if(feof(p)){
 			break;
 		}
+
+		//get next line
 		fgets(line,999,p);
 	}
 
-    fclose(p);
+	//set length of program to size
+	pcb->length = size;
+
+	//close file
+	fclose(p);
+
+	errCode = scheduler("FCFS");
+
+	return errCode;
+}
+int exec(char* script[], char* policy){
+	int errCode = 0;
+
+	char line[1000]; //buffer for line
+	int var = 0; //line number
+	int size = 0; //size of program
+	FILE *p = fopen(script,"rt");  // open file and p points to it
+	for (int i = 0 ; i < sizeof(script) ; i++){
+
+		struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
+		struct PCB *cur ;
+
+		if(p == NULL){
+				return badcommandFileDoesNotExist();
+			}
+
+		if ( pcb == NULL){
+			head = pcb; //set head
+			tail = pcb; //set tail
+
+			pcb->base = var;
+			pcb->PC = var;
+			pcb->next = NULL;
+			pcb->PID = PID_temp;
+			PID_temp++;
+			pcb->back = NULL;
+			cur = pcb ;
+		}
+		else{ 
+			tail = pcb ;
+
+			pcb->base = var;
+			pcb->PC = var;
+			pcb->next = NULL;
+			pcb->PID = PID_temp;
+			PID_temp++;
+			pcb->back = cur;
+			cur->next = pcb;
+			cur = pcb;
+		}
+		fgets(line,999,p);
+
+		while(1){
+
+			char buffer[4]; //string buffer for integer conversion
+			sprintf(buffer,"%d",var); //copy integer as a string ex: 1 -> "1"
+
+			set(buffer, line); //set line to line number as variable
+		
+			var++; //increment line number
+			size++; //increment size of program
+
+			//if end of file break
+			if(feof(p)){
+				break;
+			}
+
+			//get next line
+			fgets(line,999,p);
+		}
+
+		//set length of program to size
+		pcb->length = size;
+
+		//close file
+		fclose(p);
+	}
+	errCode = scheduler(policy);
 
 	return errCode;
 }

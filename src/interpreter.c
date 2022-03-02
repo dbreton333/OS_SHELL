@@ -285,6 +285,7 @@ int exec(char* script[], char* policy){
 	int var = 0; //line number
 	int size = 0; //size of program
 	FILE *p = fopen(script,"rt");  // open file and p points to it
+	
 	for (int i = 0 ; i < sizeof(script) ; i++){
 
 		struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file

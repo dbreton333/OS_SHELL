@@ -32,6 +32,7 @@ int badcommandTooManyTokens();
 int PCB_clear(struct PCB* pcb);
 int echo(char* var);
 int my_ls();
+int exec(char* script[], char* policy, int len);
 int PID_temp = 0;
 
 // Interpret commands and their arguments
@@ -123,17 +124,18 @@ int interpreter(char* command_args[], int args_size){
 	} else if (strcmp(command_args[0], "exec")==0) {
 	
 		if (args_size > 5) return badcommand();
+		
 		char *programs[args_size-1];
 
 		for(int i = 1 ; i < args_size - 1 ; i++){
 			printf("in exec %s \n", command_args[i]);
 
-			strcpy(programs[i-1],command_args[i]) ;
+			programs[i-1] = strdup(command_args[i]) ;
 			printf("in pro %s \n", programs[i-1]);
 		}
-		printf("after  %s \n", command_args[i]);
+		printf("after  %s \n", command_args[args_size-1]);
 		
-		return exec(programs, command_args[i]);
+		return exec(programs, command_args[args_size-1],args_size-2);
 	}
 	else return badcommand();
 }
@@ -278,24 +280,25 @@ int run(char* script){
 
 	return errCode;
 }
-int exec(char* script[], char* policy){
+int exec(char* script[], char* policy, int len){
 	int errCode = 0;
 
 	char line[1000]; //buffer for line
 	int var = 0; //line number
 	int size = 0; //size of program
-	FILE *p = fopen(script,"rt");  // open file and p points to it
+	struct PCB *prev = NULL;
 	
-	for (int i = 0 ; i < sizeof(script) ; i++){
-
+	for (int i = 0 ; i < len; i++){
+		FILE *p = fopen(script[i],"rt");  // open file and p points to it
+	
 		struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
-		struct PCB *cur ;
+		
 
 		if(p == NULL){
 				return badcommandFileDoesNotExist();
 			}
 
-		if ( pcb == NULL){
+		if ( prev == NULL){
 			head = pcb; //set head
 			tail = pcb; //set tail
 
@@ -305,19 +308,19 @@ int exec(char* script[], char* policy){
 			pcb->PID = PID_temp;
 			PID_temp++;
 			pcb->back = NULL;
-			cur = pcb ;
+			prev = pcb ;
 		}
 		else{ 
-			tail = pcb ;
+			head = pcb ;
 
 			pcb->base = var;
 			pcb->PC = var;
-			pcb->next = NULL;
+			pcb->next = prev;
 			pcb->PID = PID_temp;
 			PID_temp++;
-			pcb->back = cur;
-			cur->next = pcb;
-			cur = pcb;
+			pcb->back = NULL;
+			prev->back = pcb;
+			prev = pcb;
 		}
 		fgets(line,999,p);
 

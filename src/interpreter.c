@@ -6,8 +6,6 @@
 #include "shellmemory.h"
 #include "shell.h"
 
-struct PCB *head;
-struct PCB *tail;
 
 struct PCB {
 	int PID;
@@ -17,6 +15,9 @@ struct PCB {
 	struct PCB *next;
 	struct PCB *back;
 };
+
+struct PCB *head;
+struct PCB *tail;
 
 int MAX_ARGS_SIZE = 7; //7 for set command 2 (Command + Var) + 5 (maximum number of arguments)
 
@@ -262,10 +263,11 @@ int run(char* script){
 	//set length of program to size
 	pcb->length = size;
 
-	errCode = scheduler("FCFS");
-
 	//close file
 	fclose(p);
+
+	errCode = scheduler("FCFS");
+
 	return errCode;
 }
 
@@ -297,6 +299,7 @@ int AGING(){
 
 	return 0; //for compilation
 }
+
 int FCFS(){
 	int errCode = 0;
 	struct PCB* pcb = tail;

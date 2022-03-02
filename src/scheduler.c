@@ -29,8 +29,70 @@ int scheduler(char *policy){
 }
 
 int SJF(){
+	int errCode = 0;
+	struct PCB* pcb = tail;
+	struct PCB* sjf= pcb;
+	
+	while (pcb != NULL){
+		if (sjf->length > pcb->length){
+			sjf->next = pcb->next;
+			pcb->back = sjf->back;
+			pcb->next->back = sjf;
+			sjf->back = pcb;
+			pcb->next = sjf;
+			sjf = pcb;
 
-	return 0; //for compilation
+		}
+		pcb = pcb->back;
+	}
+
+	
+	while (pcb != NULL){
+		
+		for (int i = pcb->PC; i < pcb->length ; i++){
+			char index[4];	
+			sprintf(index,"%d",i);
+			char* userInput = mem_get_value(index);
+			char* token;
+			char** liToken =  malloc(10 * sizeof(char*));;
+			int k = 0;
+
+			//online mode -> checks if there is the symbole ;
+			if(strchr(userInput, ';') != NULL){
+		
+				token = strtok(userInput, ";");
+
+				while( token != NULL ) {
+					liToken[k] = malloc(200);
+					strcpy(liToken[k], token);
+					token = strtok(NULL, ";");
+					k++;
+				}
+
+				int j = 0;
+				
+				while( liToken[j] != NULL){
+					//parseInput for every instruction
+					errCode = parseInput(liToken[j]);
+					if (errCode == -1) exit(99);	// ignore all other errors
+					memset(liToken[j], 0, sizeof(liToken[j]));
+					free(liToken[j]); 
+					j++;
+				}
+			}else{
+
+				errCode = parseInput(userInput);
+				if (errCode == -1) exit(99);	// ignore all other errors
+				memset(userInput, 0, sizeof(userInput));	
+			}
+			free(liToken);
+		}
+		//clear pcb when pcb reaches the end
+		PCB_clear(pcb);
+		pcb = pcb->back;
+	}
+	return errCode;
+	 //for compilation
 }
 
 int RR(){

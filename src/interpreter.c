@@ -128,13 +128,8 @@ int interpreter(char* command_args[], int args_size){
 		char *programs[args_size-1];
 
 		for(int i = 1 ; i < args_size - 1 ; i++){
-			printf("in exec %s \n", command_args[i]);
-
 			programs[i-1] = strdup(command_args[i]) ;
-			printf("in pro %s \n", programs[i-1]);
 		}
-		printf("after  %s \n", command_args[args_size-1]);
-		
 		return exec(programs, command_args[args_size-1],args_size-2);
 	}
 	else return badcommand();
@@ -282,15 +277,15 @@ int run(char* script){
 }
 int exec(char* script[], char* policy, int len){
 	int errCode = 0;
-
-	char line[1000]; //buffer for line
-	int var = 0; //line number
-	int size = 0; //size of program
+	int var, size;
 	struct PCB *prev = NULL;
-	
+
 	for (int i = 0 ; i < len; i++){
 		FILE *p = fopen(script[i],"rt");  // open file and p points to it
-	
+
+		char line[1000]; //buffer for line
+		var = 0; //line number
+	    size = 0; //size of program
 		struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
 		
 
@@ -345,11 +340,11 @@ int exec(char* script[], char* policy, int len){
 
 		//set length of program to size
 		pcb->length = size;
+		printf("pcb: %d and size: %d \n", pcb->PID, size);
 
 		//close file
 		fclose(p);
 	}
 	errCode = scheduler(policy);
-
 	return errCode;
 }

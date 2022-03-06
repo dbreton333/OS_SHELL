@@ -277,14 +277,14 @@ int run(char* script){
 }
 int exec(char* script[], char* policy, int len){
 	int errCode = 0;
-	int var, size;
+	int var =0; //line number
+	int size;
 	struct PCB *prev = NULL;
 
 	for (int i = 0 ; i < len; i++){
 		FILE *p = fopen(script[i],"rt");  // open file and p points to it
 
 		char line[1000]; //buffer for line
-		var = 0; //line number
 	    size = 0; //size of program
 		struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
 		

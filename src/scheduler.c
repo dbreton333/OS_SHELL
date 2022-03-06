@@ -28,46 +28,32 @@ int scheduler(char *policy){
 		return badcommandNoSuchPolicy();
 	}
 }
-int swap (struct PCB* p1, struct PCB* p2){
-	printf("0\n");
-	p1->back = p2->back;
-	printf("1\n");	
-	p2->next = p1->next;
-	if(p2->back != NULL){
-		p2->back->next = p1;
-		printf("3\n");
-	}
-	p1->next = p2;
-	printf("4\n");
-	p2->back = p1;
-	printf("5\n");
-	
-}
+
 int SJF(){
 	int errCode = 0;
 	struct PCB* pcb = tail;
 	struct PCB* sjf = pcb;
 	struct PCB* temp = pcb;
-	int i = 0;
+
+	//int i = 0;
 	while (pcb != NULL){
-		printf("in i = %d \n",i);
+		//printf("in i = %d \n",i);
 		if (sjf->length > pcb->length) {
 			printf("sjf length : %d\n",sjf->length);
 			printf("pcb length : %d\n",pcb->length);
-			printf("in condition\n");
+			//printf("in condition\n");
 				sjf->back = pcb->back;
-				printf("1\n");
+				//printf("1\n");
 				pcb->next = sjf->next;
-				printf("2\n");
+				//printf("2\n");
 				if(pcb->back != NULL){
 					pcb->back->next = sjf;
-					printf("3\n");
+					//printf("3\n");
 				}
 				sjf->next = pcb;
-				printf("4\n");
+				//printf("4\n");
 				pcb->back = sjf;
-				printf("5\n");
-				//swap(sjf,pcb);
+				//printf("5\n");
 				temp = sjf;
 				sjf = pcb;
 				printf("id : %d \n", sjf->PID);
@@ -75,7 +61,7 @@ int SJF(){
 		printf("pcb %d and length %d \n", pcb->PID, pcb->length);
 		printf("sjf %d and leng %d \n", sjf->PID, sjf->length);
 		pcb = temp->back;
-		i++;
+		//i++;
 	}
 	
 	
@@ -111,7 +97,8 @@ int SJF(){
 					free(liToken[j]); 
 					j++;
 				}
-			}else{
+			}
+			else{
 
 				errCode = parseInput(userInput);
 				if (errCode == -1) exit(99);	// ignore all other errors

@@ -282,6 +282,7 @@ int run(char* script){
 	fclose(p);
 
 	errCode = scheduler("FCFS");
+}
 
 int exec(char* script[], char* policy, int nbr){
 	int errCode = 0;

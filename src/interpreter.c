@@ -8,7 +8,6 @@
 #include "shell.h"
 #include "scheduler.h"
 
-
 int MAX_ARGS_SIZE = 7; //7 for set command 2 (Command + Var) + 5 (maximum number of arguments)
 
 int help();

@@ -8,19 +8,6 @@
 #include "shell.h"
 #include "scheduler.h"
 
-
-struct PCB {
-	int PID;
-	int base;
-	int PC;
-	int length;
-	struct PCB *next;
-	struct PCB *back;
-};
-
-struct PCB *head;
-struct PCB *tail;
-
 int MAX_ARGS_SIZE = 7; //7 for set command 2 (Command + Var) + 5 (maximum number of arguments)
 
 int help();

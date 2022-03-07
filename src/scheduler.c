@@ -49,11 +49,12 @@ int SJF(){
 		
 		}
 	}
+
+	struct PCB* tmp = tail;
 	
-	
-	while (sjf != NULL){
+	while (tmp != NULL){
 		
-		for (int i = sjf->PC; i < (sjf->length + sjf->base) ; i++){
+		for (int i = tmp->PC; i < (tmp->length + tmp->base) ; i++){
 			char index[4];	
 			sprintf(index,"%d",i);
 			char* userInput = mem_get_value(index);
@@ -93,8 +94,8 @@ int SJF(){
 			free(liToken);
 		}
 		//clear pcb when pcb reaches the end
-		PCB_clear(sjf);
-		sjf = sjf->back;
+		PCB_clear(tmp);
+		tmp = tmp->back;
 	}
 	return errCode;
 }

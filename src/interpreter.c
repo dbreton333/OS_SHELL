@@ -280,9 +280,6 @@ int exec(char* script[], char* policy, int nbr){
 
 		FILE *p = fopen(script[i],"rt");  // open file and p points to it
 
-		printf("scripts:\n");
-		printf("%s\n",script[i]);
-
 		if(p == NULL){
 				return badcommandFileDoesNotExist();
 		}
@@ -341,7 +338,7 @@ int exec(char* script[], char* policy, int nbr){
 		//set length of program to size
 		pcb->length = size;
 
-		printf("pcb: %d and size: %d \n", pcb->PID, size);
+		//printf("pcb: %d and size: %d \n", pcb->PID, size);
 
 		//close file
 		fclose(p);

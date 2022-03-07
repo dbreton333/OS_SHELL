@@ -30,23 +30,38 @@ int scheduler(char *policy){
 int SJF(){
 	int errCode = 0;
 	struct PCB* pcb = tail;
+	int end = 0;
 
-	// 
-	while (1){
-		struct PCB* prev = pcb->back;
-		if (prev != NULL && pcb->length > prev->length) {
-			pcb->back = prev->back;
-			if(prev->back != NULL){
-				prev->back->next = pcb;
+	while(end != 1){
+		end = 1;
+
+		while (pcb != NULL){
+			struct PCB* prev = pcb->back;
+
+			if (prev != NULL && pcb->length > prev->length) {
+				pcb->back = prev->back;
+
+				if(prev->back != NULL){
+					prev->back->next = pcb;
+				}
+				prev->next = pcb->next;
+				if(pcb->next != NULL){
+					pcb->next->back = prev;
+				}
+				pcb->next = prev;
+				prev->back = pcb;
+
+				if(pcb == tail){
+					tail = prev;
+				}
+
+				if(prev == head){
+					head = pcb;
+				}
+				end = 0;
 			}
-			prev->next = pcb->next;
-			if(pcb->next != NULL){
-				pcb->next->back = prev;
-			}
-			pcb->next = prev;
-			tail = prev;
-		}else{
-		
+
+			pcb = prev;
 		}
 	}
 
@@ -115,8 +130,6 @@ int FCFS(){
 	struct PCB* pcb = tail;
 
 	while(pcb != NULL){
-		printf("pcb len : %d\n",pcb->length);
-		printf("pcb# : %d\n",pcb->PID);
 		//printf("pcb back : %d\n",pcb->PC);
 		for (int i = pcb->PC; i < (pcb->length + pcb->base); i++){
 			
@@ -164,9 +177,7 @@ int FCFS(){
 		}
 		//clear pcb when pcb reaches the end
 		PCB_clear(pcb);
-		printf("before ending\n");
 		pcb = pcb->back;
-		printf("finish\n");
 	}
 	return errCode;
 }

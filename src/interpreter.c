@@ -270,7 +270,6 @@ int run(char* script){
 
 	errCode = scheduler("FCFS");
 }
-
 int exec(char* script[], char* policy, int nbr){
 	int errCode = 0;
 	int var = 0; //line number

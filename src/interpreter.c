@@ -9,18 +9,6 @@
 #include "scheduler.h"
 
 
-struct PCB {
-	int PID;
-	int base;
-	int PC;
-	int length;
-	struct PCB *next;
-	struct PCB *back;
-};
-
-struct PCB *head;
-struct PCB *tail;
-
 int MAX_ARGS_SIZE = 7; //7 for set command 2 (Command + Var) + 5 (maximum number of arguments)
 
 int help();
@@ -282,7 +270,7 @@ int run(char* script){
 	fclose(p);
 
 	errCode = scheduler("FCFS");
-
+}
 int exec(char* script[], char* policy, int nbr){
 	int errCode = 0;
 	int var = 0; //line number

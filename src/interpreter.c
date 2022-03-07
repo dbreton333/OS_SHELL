@@ -263,6 +263,7 @@ int run(char* script){
 
 	//set length of program to size
 	pcb->length = size;
+	pcb->score =size;
 
 	//close file
 	fclose(p);
@@ -337,6 +338,7 @@ int exec(char* script[], char* policy, int nbr){
 
 		//set length of program to size
 		pcb->length = size;
+		pcb->score = size;
 
 		//printf("pcb: %d and size: %d \n", pcb->PID, size);
 
@@ -378,6 +380,6 @@ int PCB_clear(struct PCB* pcb){
  }
 
  if(tail == pcb){
-	 tail == pcb->back;
+	 tail = pcb->back;
  }
 }

@@ -6,6 +6,7 @@ struct PCB {
 	int base;
 	int PC;
 	int length;
+    int score;
 	struct PCB *next;
 	struct PCB *back;
 };

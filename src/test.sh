@@ -24,7 +24,7 @@ then
     ./mysh < ../A1-testcases_public/batch.txt
 fi
 
-if [[ $1 == 2 ]] 
+if [[ $1 == 2 ]]
 then
     echo "set test **************************"
     echo " "

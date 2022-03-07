@@ -226,8 +226,8 @@ int run(char* script){
 	FILE *p = fopen(script,"rt");  // open file and p points to it
 
 	struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
-	tail = pcb; //set tail
 	head = pcb; //set head
+	tail = pcb; //set tail
 
 	if(p == NULL){
 		return badcommandFileDoesNotExist();
@@ -291,8 +291,8 @@ int exec(char* script[], char* policy, int nbr){
 		
 
 		if ( prev == NULL){
-			tail = pcb; //set tail
 			head = pcb; //set head
+			tail = pcb; //set tail
 
 			pcb->base = var;
 			pcb->PC = var;
@@ -375,11 +375,11 @@ int PCB_clear(struct PCB* pcb){
 	 }
  }
 
- if(tail == pcb){
-	 tail = pcb->next;
- }
-
  if(head == pcb){
 	 head = pcb->back;
+ }
+
+ if(tail == pcb){
+	 tail = pcb->next;
  }
 }

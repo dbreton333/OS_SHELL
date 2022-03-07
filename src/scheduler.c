@@ -12,7 +12,7 @@ int AGING();
 int SJF();
 int badcommandNoSuchPolicy();
 void sortQueueL();
-struct PCB* decrement(struct PCB* curr);
+struct PCB* decrement();
 void switchPlace(struct PCB* pcb);
 
 int scheduler(char *policy){
@@ -189,15 +189,15 @@ int RR(){
 	return errCode;
 }
 
-struct PCB* decrement(struct PCB* curr){
+struct PCB* decrement(){
 	struct PCB* pcb = head;
 	struct PCB* smaller = NULL;
 	while(pcb != NULL){
-		if(pcb != curr){
+		if(pcb != head){
 			if(pcb->score != 0){
 				pcb->score -= 1;
 			}
-			if(pcb->score < curr->score){
+			if(pcb->score < head->score){
 				if(smaller == NULL){
 					smaller = pcb;
 				}else{
@@ -214,29 +214,29 @@ struct PCB* decrement(struct PCB* curr){
 }
 
 void switchPlace(struct PCB* pcb) {
-	struct PCB* tl = head;
+	struct PCB* hd = head;
 
-	if(tl->back = pcb){
-		tl->back = pcb->back;
+	if(hd->back = pcb){
+		hd->back = pcb->back;
 
 		if(pcb->back != NULL){
-			pcb->back->next = tl;
+			pcb->back->next = hd;
 		}
 
 		pcb->next = NULL;
 
-		tl->next = pcb;
-		pcb->back = tl;
+		hd->next = pcb;
+		pcb->back = hd;
 
 	}else{
 		struct PCB* tmp1 = pcb->back;
 		struct PCB* tmp2 = pcb->next;
 
-		pcb->back = tl->back;
+		pcb->back = hd->back;
 		pcb->next = NULL;
 
-		tl->next = tmp2;
-		tl->back = tmp1;
+		hd->next = tmp2;
+		hd->back = tmp1;
 
 	}
 }
@@ -295,7 +295,7 @@ int AGING(){
 
 			tmp->PC += 1;
 
-			struct PCB* pcbs = decrement(tmp);
+			struct PCB* pcbs = decrement();
 
 			if(pcbs != NULL){
 				switchPlace(pcbs);

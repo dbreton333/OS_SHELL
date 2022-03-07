@@ -31,7 +31,7 @@ int scheduler(char *policy){
 
 void sortQueueL(){
 	int end = 0;
-	struct PCB* pcb = tail;
+	struct PCB* pcb = head;
 
 	while(end != 1){
 		end = 1;
@@ -52,12 +52,12 @@ void sortQueueL(){
 				pcb->next = prev;
 				prev->back = pcb;
 
-				if(pcb == tail){
-					tail = prev;
+				if(pcb == head){
+					head = prev;
 				}
 
-				if(prev == head){
-					head = pcb;
+				if(prev == tail){
+					tail = pcb;
 				}
 				end = 0;
 			}
@@ -71,7 +71,7 @@ int SJF(){
 	int errCode = 0;
 	sortQueueL();
 
-	struct PCB* tmp = tail;
+	struct PCB* tmp = head;
 	
 	while (tmp != NULL){
 		
@@ -125,9 +125,9 @@ int SJF(){
 
 int RR(){
 	int errCode = 0;
-	struct PCB* pcb = tail;
+	struct PCB* pcb = head;
 
-	while(tail != NULL){
+	while(head != NULL){
 		//printf("pcb back : %d\n",pcb->PC);
 		int index = pcb->PC;
 		for (int i = index; (i < index + 2) && (i < (pcb->length + pcb->base)); i++){
@@ -183,14 +183,14 @@ int RR(){
 		pcb = pcb->back;
 
 		if(pcb == NULL){
-			pcb = tail;
+			pcb = head;
 		}
 	}
 	return errCode;
 }
 
 struct PCB* decrement(struct PCB* curr){
-	struct PCB* pcb = tail;
+	struct PCB* pcb = head;
 	struct PCB* smaller = NULL;
 	while(pcb != NULL){
 		if(pcb != curr){
@@ -214,7 +214,7 @@ struct PCB* decrement(struct PCB* curr){
 }
 
 void switchPlace(struct PCB* pcb) {
-	struct PCB* tl = tail;
+	struct PCB* tl = head;
 
 	if(tl->back = pcb){
 		tl->back = pcb->back;
@@ -248,9 +248,9 @@ int AGING(){
 
 	sortQueueL();
 
-	struct PCB* tmp = tail;
+	struct PCB* tmp = head;
 	
-	while (tail != NULL){
+	while (head != NULL){
 		
 		int index = tmp->PC;
 		for (int i = index; i < (tmp->length + tmp->base); i++){
@@ -309,7 +309,7 @@ int AGING(){
 			PCB_clear(tmp);
 		}
 
-		tmp = tail;
+		tmp = head;
 
 	}
 
@@ -318,7 +318,7 @@ int AGING(){
 
 int FCFS(){
 	int errCode = 0;
-	struct PCB* pcb = tail;
+	struct PCB* pcb = head;
 
 	while(pcb != NULL){
 		//printf("pcb back : %d\n",pcb->PC);

@@ -24,7 +24,7 @@ then
     ./mysh < ../A1-testcases_public/batch.txt
 fi
 
-if [[ $1 == 2 ]] 
+if [[ $1 == 2 ]]
 then
     echo "set test **************************"
     echo " "
@@ -48,23 +48,23 @@ fi
 
 if [[ $1 == 3 ]] 
 then
-    echo "set test **************************"
+    echo "AGING test **************************"
     echo " "
-    ./mysh < ../A2-testcases_public/AGING
+    ##./mysh < ../A2_testcases_public/AGING
     echo " "
-    echo "oneline test **************************"
+    echo "FCFS test **************************"
     echo " "
-    ./mysh < ../A2-testcases_public/FCFS
+    ./mysh < ../A2_testcases_public/FCFS
     echo " "
-    echo "ls test **************************"
+    echo "FileNameTest test **************************"
     echo " "
-    ./mysh < ../A2-testcases_public/FileNameTest
+    ##./mysh < ../A2_testcases_public/FileNameTest
     echo " "
-    echo "echo test **************************"
+    echo "RR test **************************"
     echo " "
-    ./mysh < ../A2-testcases_public/RR
+    ##./mysh < ../A2_testcases_public/RR
     echo " "
-    echo "batch test **************************"
-    ./mysh < ../A2-testcases_public/SJF
+    echo "SJF test **************************"
+    ./mysh < ../A2_testcases_public/SJF
 fi
 

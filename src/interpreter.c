@@ -3,8 +3,10 @@
 #include <string.h> 
 
 
+#include "interpreter.h"
 #include "shellmemory.h"
 #include "shell.h"
+#include "scheduler.h"
 
 
 struct PCB {
@@ -39,6 +41,7 @@ int badcommandTooManyTokens();
 int PCB_clear(struct PCB* pcb);
 int echo(char* var);
 int my_ls();
+int exec(char* script[], char* policy, int len);
 int PID_temp = 0;
 
 // Interpret commands and their arguments
@@ -127,7 +130,18 @@ int interpreter(char* command_args[], int args_size){
 		if (args_size != 1) return badcommand();
 		return my_ls();
 
-	} else return badcommand();
+	} else if (strcmp(command_args[0], "exec")==0) {
+	
+		if (args_size > 5) return badcommand();
+		
+		char *programs[args_size-1];
+
+		for(int i = 1 ; i < args_size - 1 ; i++){
+			programs[i-1] = strdup(command_args[i]) ;
+		}
+		return exec(programs, command_args[args_size-1],args_size-2);
+	}
+	else return badcommand();
 }
 
 int help(){
@@ -262,91 +276,88 @@ int run(char* script){
 
 	//set length of program to size
 	pcb->length = size;
+	pcb->score =size;
 
 	//close file
 	fclose(p);
 
 	errCode = scheduler("FCFS");
 
-	return errCode;
-}
-
-int scheduler(char *policy){
-	if(strcmp(policy,"FCFS") == 0){
-		return FCFS();
-	}else if(strcmp(policy,"SJF") == 0){
-		return SJF();
-	}else if(strcmp(policy,"RR") == 0){
-		return RR();
-	}else if(strcmp(policy,"AGING") == 0){
-		return AGING();
-	}else{
-		return badcommandNoSuchPolicy();
-	}
-}
-
-int SJF(){
-
-	return 0; //for compilation
-}
-
-int RR(){
-
-	return 0; //for compilation
-}
-
-int AGING(){
-
-	return 0; //for compilation
-}
-
-int FCFS(){
+int exec(char* script[], char* policy, int nbr){
 	int errCode = 0;
-	struct PCB* pcb = tail;
+	int var = 0; //line number
+	struct PCB *prev = NULL;
 
-	while(pcb != NULL){
-		for (int i = pcb->PC; i < pcb->length ; i++){
-			char index[4];	
-			sprintf(index,"%d",i);
-			char* userInput = mem_get_value(index);
-			char* token;
-			char** liToken =  malloc(10 * sizeof(char*));;
-			int k = 0;
+	for (int i = 0 ; i < nbr; i++){
 
-			//online mode -> checks if there is the symbole ;
-			if(strchr(userInput, ';') != NULL){
-		
-				token = strtok(userInput, ";");
+		FILE *p = fopen(script[i],"rt");  // open file and p points to it
 
-				while( token != NULL ) {
-					liToken[k] = malloc(200);
-					strcpy(liToken[k], token);
-					token = strtok(NULL, ";");
-					k++;
-				}
-
-				int j = 0;
-				
-				while( liToken[j] != NULL){
-					//parseInput for every instruction
-					errCode = parseInput(liToken[j]);
-					if (errCode == -1) exit(99);	// ignore all other errors
-					memset(liToken[j], 0, sizeof(liToken[j]));
-					free(liToken[j]); 
-					j++;
-				}
-			}else{
-
-				errCode = parseInput(userInput);
-				if (errCode == -1) exit(99);	// ignore all other errors
-				memset(userInput, 0, sizeof(userInput));	
-			}
-			free(liToken);
+		if(p == NULL){
+				return badcommandFileDoesNotExist();
 		}
-		//clear pcb when pcb reaches the end
-		PCB_clear(pcb);
-		pcb = pcb->back;
+
+		int size = 0; //size of program
+		char line[1000]; //buffer for line
+		struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
+		
+
+		if ( prev == NULL){
+			head = pcb; //set head
+			tail = pcb; //set tail
+
+			pcb->base = var;
+			pcb->PC = var;
+			pcb->next = NULL;
+			pcb->PID = PID_temp;
+			PID_temp++;
+			pcb->back = NULL;
+			prev = pcb ;
+		}
+		else{ 
+			tail = pcb ;
+
+			pcb->base = var;
+			pcb->PC = var;
+			pcb->next = prev;
+			pcb->PID = PID_temp;
+			PID_temp++;
+			pcb->back = NULL;
+			prev->back = pcb;
+			prev = pcb;
+		}
+
+		fgets(line,999,p);
+
+		while(1){
+
+			char buffer[4]; //string buffer for integer conversion
+			sprintf(buffer,"%d",var); //copy integer as a string ex: 1 -> "1"
+
+			set(buffer, line); //set line to line number as variable
+		
+			var++; //increment line number
+			size++; //increment size of program
+
+			//if end of file break
+			if(feof(p)){
+				break;
+			}
+
+			//get next line
+			fgets(line,999,p);
+		}
+
+		//set length of program to size
+		pcb->length = size;
+		pcb->score = size;
+
+		//printf("pcb: %d and size: %d \n", pcb->PID, size);
+
+		//close file
+		fclose(p);
 	}
+
+	errCode = scheduler(policy);
 	return errCode;
 }
 
@@ -376,10 +387,10 @@ int PCB_clear(struct PCB* pcb){
  }
 
  if(head == pcb){
-	 head = pcb->next;
+	 head = pcb->back;
  }
 
  if(tail == pcb){
-	 tail == pcb->back;
+	 tail = pcb->next;
  }
 }

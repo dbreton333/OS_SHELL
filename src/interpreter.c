@@ -3,14 +3,10 @@
 #include <string.h> 
 
 
+#include "interpreter.h"
 #include "shellmemory.h"
 #include "shell.h"
 #include "scheduler.h"
-
-
-
-struct PCB *head;
-struct PCB *tail;
 
 int MAX_ARGS_SIZE = 7; //7 for set command 2 (Command + Var) + 5 (maximum number of arguments)
 
@@ -275,23 +271,26 @@ int run(char* script){
 
 	return errCode;
 }
-int exec(char* script[], char* policy, int len){
+int exec(char* script[], char* policy, int nbr){
 	int errCode = 0;
-	int var =0; //line number
-	int size;
+	int var = 0; //line number
 	struct PCB *prev = NULL;
 
-	for (int i = 0 ; i < len; i++){
+	for (int i = 0 ; i < nbr; i++){
+
 		FILE *p = fopen(script[i],"rt");  // open file and p points to it
 
-		char line[1000]; //buffer for line
-	    size = 0; //size of program
-		struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
-		
+		printf("scripts:\n");
+		printf("%s\n",script[i]);
 
 		if(p == NULL){
 				return badcommandFileDoesNotExist();
-			}
+		}
+
+		int size = 0; //size of program
+		char line[1000]; //buffer for line
+		struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
+		
 
 		if ( prev == NULL){
 			head = pcb; //set head
@@ -317,6 +316,7 @@ int exec(char* script[], char* policy, int len){
 			prev->back = pcb;
 			prev = pcb;
 		}
+
 		fgets(line,999,p);
 
 		while(1){
@@ -340,11 +340,47 @@ int exec(char* script[], char* policy, int len){
 
 		//set length of program to size
 		pcb->length = size;
+
 		printf("pcb: %d and size: %d \n", pcb->PID, size);
 
 		//close file
 		fclose(p);
 	}
+
 	errCode = scheduler(policy);
 	return errCode;
+}
+
+int PCB_clear(struct PCB* pcb){
+ //clear the PCB in the shell memory
+ //remove PCB from QUEUE
+ char index[4];	
+ for(int i = pcb->base; i < pcb->length; i++){
+	sprintf(index,"%d",i);
+	mem_clear(index);
+ }
+
+ if(pcb->back != NULL){
+	 if(pcb->next != NULL){
+	 	pcb->back->next = pcb->next;
+	 }else{
+		pcb->back->next = NULL;
+	 }
+ }
+
+ if(pcb->next != NULL){
+	 if(pcb->back != NULL){
+		 pcb->next->back = pcb->back;
+	 }else{
+		 pcb->next->back = NULL;
+	 }
+ }
+
+ if(head == pcb){
+	 head = pcb->next;
+ }
+
+ if(tail == pcb){
+	 tail == pcb->back;
+ }
 }

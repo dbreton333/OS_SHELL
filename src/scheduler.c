@@ -18,6 +18,7 @@ struct PCB* findSmaller();
 void switchPlace(struct PCB* pcb);
 
 int scheduler(char *policy){
+	//choosing different policies
 	if(strcmp(policy,"FCFS") == 0){
 		return FCFS();
 	}else if(strcmp(policy,"SJF") == 0){
@@ -37,13 +38,13 @@ void sortQueueL(){
 
 	while(end != 1){
 		end = 1;
-
+		//traversing through pcbs
 		while (pcb != NULL){
 			struct PCB* prev = pcb->back;
-
+			//checking if current pcb has greater length then the previous one
 			if (prev != NULL && pcb->length > prev->length) {
 				pcb->back = prev->back;
-
+				//making sure not NULL and then updating pointers
 				if(prev->back != NULL){
 					prev->back->next = pcb;
 				}
@@ -75,13 +76,13 @@ void sortQueueS(){
 
 	while(end != 1){
 		end = 1;
-
+		//traversing through pcbs
 		while (pcb != NULL){
 			struct PCB* prev = pcb->back;
-
+			//checking if current pcb has greater score then the previous one
 			if (prev != NULL && pcb->score > prev->score) {
 				pcb->back = prev->back;
-
+				//making sure not NULL and then updating pointers
 				if(prev->back != NULL){
 					prev->back->next = pcb;
 				}
@@ -109,6 +110,7 @@ void sortQueueS(){
 
 int SJF(){
 	int errCode = 0;
+	//calling sort to get shortest job 
 	sortQueueL();
 
 	struct PCB* tmp = head;
@@ -116,6 +118,7 @@ int SJF(){
 	while (tmp != NULL){
 		
 		int index = tmp->PC;
+		//looping through each program
 		for (int i = index; i < (tmp->length + tmp->base); i++){
 			char index[4];	
 			sprintf(index,"%d",i);
@@ -168,16 +171,14 @@ int RR(){
 	struct PCB* pcb = head;
 
 	while(head != NULL){
-		//printf("pcb back : %d\n",pcb->PC);
 		int index = pcb->PC;
+		//looping through each program and running two instructions per program
 		for (int i = index; (i < index + 2) && (i < (pcb->length + pcb->base)); i++){
 			
-			//printf("loop pcb# : %d\n",pcb->PID);
 			char index[4];	
 			sprintf(index,"%d",i);
 			
 			char* userInput = mem_get_value(index);
-			//printf("first %s\n",userInput);
 			char* token;
 			char** liToken =  malloc(10 * sizeof(char*));;
 			int k = 0;
@@ -205,9 +206,7 @@ int RR(){
 					j++;
 				}
 			}else{
-				//printf("else pid %d\n",pcb->PID);
 				errCode = parseInput(userInput);
-				//printf("str %s\n",userInput);
 			
 				if (errCode == -1) exit(99);	// ignore all other errors
 				memset(userInput, 0, sizeof(userInput));	
@@ -231,7 +230,7 @@ int RR(){
 
 void decrement(){
 	struct PCB* pcb = head;
-
+	//checking which pcb needs to decrement the score
 	while(pcb != NULL){
 		if(pcb != head){
 			if(pcb->score != 0){
@@ -245,6 +244,7 @@ void decrement(){
 
 int AGING(){
 	int errCode = 0;
+	//sorting queue 
 	sortQueueS();
 	
 	while(head != NULL){
@@ -304,16 +304,14 @@ int FCFS(){
 	struct PCB* pcb = head;
 
 	while(pcb != NULL){
-		//printf("pcb back : %d\n",pcb->PC);
 		int index = pcb->PC;
+		//looping through each program 
 		for (int i = index; i < (pcb->length + pcb->base); i++){
-			
-			//printf("loop pcb# : %d\n",pcb->PID);
+	
 			char index[4];	
 			sprintf(index,"%d",i);
 			
 			char* userInput = mem_get_value(index);
-			//printf("first %s\n",userInput);
 			char* token;
 			char** liToken =  malloc(10 * sizeof(char*));;
 			int k = 0;
@@ -341,9 +339,7 @@ int FCFS(){
 					j++;
 				}
 			}else{
-				//printf("else pid %d\n",pcb->PID);
 				errCode = parseInput(userInput);
-				//printf("str %s\n",userInput);
 			
 				if (errCode == -1) exit(99);	// ignore all other errors
 				memset(userInput, 0, sizeof(userInput));	

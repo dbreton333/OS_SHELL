@@ -24,6 +24,7 @@ int run(char* script);
 int badcommandDigitVariable();
 int badcommandFileDoesNotExist();
 int badcommandNoSuchPolicy();
+int badcommandSameFileName();
 int scheduler(char *policy);
 int badcommandTooManyTokens();
 int PCB_clear(struct PCB* pcb);
@@ -127,6 +128,11 @@ int interpreter(char* command_args[], int args_size){
 		for(int i = 1 ; i < args_size - 1 ; i++){
 			programs[i-1] = strdup(command_args[i]) ;
 		}
+		for(int i = 0 ; i < args_size - 1 ; i++){
+			if((strcmp(programs[i],programs[i+1]) == 0) || (strcmp(programs[i],programs[i+2]) == 0 )){
+				return badcommandSameFileName();
+			}
+		}
 		return exec(programs, command_args[args_size-1],args_size-2);
 	}
 	else return badcommand();
@@ -153,7 +159,10 @@ int badcommand(){
 	printf("%s\n", "Unknown Command");
 	return 1;
 }
-
+int badcommandSameFileName(){
+	printf("%s\n","Bad command: same file name");
+	return 1;
+}
 int badcommandDigitVariable(){
 	printf("%s\n", "Connot have a integer as a variable");
 	return 1;
@@ -275,7 +284,7 @@ int exec(char* script[], char* policy, int nbr){
 	int errCode = 0;
 	int var = 0; //line number
 	struct PCB *prev = NULL;
-
+	
 	for (int i = 0 ; i < nbr; i++){
 
 		FILE *p = fopen(script[i],"rt");  // open file and p points to it
@@ -338,8 +347,6 @@ int exec(char* script[], char* policy, int nbr){
 		//set length of program to size
 		pcb->length = size;
 		pcb->score = size;
-
-		//printf("pcb: %d and size: %d \n", pcb->PID, size);
 
 		//close file
 		fclose(p);

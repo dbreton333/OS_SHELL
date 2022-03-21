@@ -122,17 +122,19 @@ int interpreter(char* command_args[], int args_size){
 	
 		if (args_size > 5) return badcommand();
 		
-		char *programs[args_size-1];
+		char *programs[args_size-2];
+
 
 		for(int i = 1 ; i < args_size - 1 ; i++){
-			programs[i-1] = strdup(command_args[i]) ;
+			programs[i-1] = strdup(command_args[i]);
 		}
-		for(int i = 0 ; i < args_size - 1 ; i++){
-			if((strcmp(programs[i],programs[i+1]) == 0) || (strcmp(programs[i],programs[i+2]) == 0 )){
+
+		for(int i = 0 ; i < args_size - 2 ; i++){
+			if((i+1<args_size - 2 && (strcmp(programs[i],programs[i+1]) == 0)) || (i+2< args_size - 2 && (strcmp(programs[i],programs[i+2]) == 0 ))){
 				return badcommandSameFileName();
 			}
 		}
-		return exec(programs, command_args[args_size-1],args_size-2);
+		return exec(programs, command_args[args_size-1], args_size-2);
 	}
 	else return badcommand();
 }

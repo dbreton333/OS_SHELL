@@ -65,6 +65,7 @@ int interpreter(char* command_args[], int args_size){
 	
 	} else if (strcmp(command_args[0], "quit")==0) {
 		//quit
+		system("rmdir backstore");
 		if (args_size != 1) return badcommand();
 		return quit();
 
@@ -152,6 +153,7 @@ run SCRIPT.TXT		Executes the file SCRIPT.TXT\n ";
 }
 
 int quit(){
+
 	printf("%s\n", "Bye!");
 	exit(0);
 }

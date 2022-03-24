@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h> 
 
+
 #include "interpreter.h"
 #include "shellmemory.h"
 
@@ -12,7 +13,10 @@ int parseInput(char ui[]);
 
 // Start of everything
 int main(int argc, char *argv[]) {
-
+	//removing directory if already exist and creating new one
+	system("rm -rf backstore");
+	system("mkdir backstore");
+	
 	printf("%s\n", "Shell version 1.1 Created January 2022");
 	help();
 

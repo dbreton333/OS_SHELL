@@ -65,7 +65,7 @@ int interpreter(char* command_args[], int args_size){
 	
 	} else if (strcmp(command_args[0], "quit")==0) {
 		//quit
-		system("rmdir backstore");
+		system("rm -r backstore");
 		if (args_size != 1) return badcommand();
 		return quit();
 
@@ -106,6 +106,8 @@ int interpreter(char* command_args[], int args_size){
 		return print(command_args[1]);
 	
 	} else if (strcmp(command_args[0], "run")==0) {
+		system("rm -rf backstore");
+		system("mkdir backstore");
 		if (args_size != 2) return badcommand();
 		return run(command_args[1]);
 	
@@ -120,7 +122,8 @@ int interpreter(char* command_args[], int args_size){
 		return my_ls();
 
 	} else if (strcmp(command_args[0], "exec")==0) {
-	
+		system("rm -rf backstore");
+		system("mkdir backstore");
 		if (args_size > 5) return badcommand();
 		
 		char *programs[args_size-2];
@@ -236,8 +239,18 @@ int run(char* script){
 	char line[1000]; //buffer for line
 	int var = 0; //line number
 	int size = 0; //size of program
-	FILE *p = fopen(script,"rt");  // open file and p points to it
-
+	
+	char t[100] = "cp ";
+	char u[100] = "backstore";
+	strcat(t, script);
+	strcat(t , " ");
+	strcat(t, u);
+	system(t);
+	char s[10] = "/";
+	strcat(s,script);
+	strcat(u,s);
+	
+	FILE *p = fopen(u,"rt")  ;  // open file and p points to it
 	struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
 	head = pcb; //set head
 	tail = pcb; //set tail
@@ -256,7 +269,7 @@ int run(char* script){
 	fgets(line,999,p);
 
 	while(1){
-
+		
 		char buffer[4]; //string buffer for integer conversion
 		sprintf(buffer,"%d",var); //copy integer as a string ex: 1 -> "1"
 
@@ -289,8 +302,17 @@ int exec(char* script[], char* policy, int nbr){
 	struct PCB *prev = NULL;
 	
 	for (int i = 0 ; i < nbr; i++){
+		char t[100] = "cp ";
+	char u[100] = "backstore";
+	strcat(t, script[i]);
+	strcat(t , " ");
+	strcat(t, u);
+	system(t);
+	char s[10] = "/";
+	strcat(s,script[i]);
+	strcat(u,s);
 
-		FILE *p = fopen(script[i],"rt");  // open file and p points to it
+		FILE *p = fopen(u,"rt");  // open file and p points to it
 
 		if(p == NULL){
 				return badcommandFileDoesNotExist();

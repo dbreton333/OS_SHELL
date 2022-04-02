@@ -50,7 +50,7 @@ if [[ $1 == 3 ]]
 then
     echo "AGING test **************************"
     echo " "
-    ##./mysh < ../A2_testcases_public/AGING
+    ./mysh < ../A2_testcases_public/AGING
     echo " "
     echo "FCFS test **************************"
     echo " "
@@ -58,11 +58,11 @@ then
     echo " "
     echo "FileNameTest test **************************"
     echo " "
-    ##./mysh < ../A2_testcases_public/FileNameTest
+    ./mysh < ../A2_testcases_public/FileNameTest
     echo " "
     echo "RR test **************************"
     echo " "
-    ##./mysh < ../A2_testcases_public/RR
+    ./mysh < ../A2_testcases_public/RR
     echo " "
     echo "SJF test **************************"
     ./mysh < ../A2_testcases_public/SJF

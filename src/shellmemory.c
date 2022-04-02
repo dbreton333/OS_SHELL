@@ -23,6 +23,13 @@ struct frame_struct f_store[FRAME_S];
 
 struct memory_struct shellmemory[VAR_S];
 
+int resetmem(){
+	for(int i=0 ; i < VAR_S ; i++ ){
+		shellmemory[i].var = "none";
+		shellmemory[i].value = "none";
+	}
+}
+
 // Helper functions
 int match(char *model, char *var) {
 	int i, len=strlen(var), matchCount=0;

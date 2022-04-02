@@ -13,6 +13,9 @@ int parseInput(char ui[]);
 // Start of everything
 int main(int argc, char *argv[]) {
 
+	system("rm -rf backstore");
+	system("mkdir backstore");
+
 	printf("%s\n", "Shell version 1.1 Created January 2022");
 	help();
 

@@ -152,6 +152,9 @@ run SCRIPT.TXT		Executes the file SCRIPT.TXT\n ";
 }
 
 int quit(){
+
+	system("rm -rf backstore");
+	
 	printf("%s\n", "Bye!");
 	exit(0);
 }

@@ -3,12 +3,25 @@
 #include<stdio.h>
 
 
+#define SHELL_MEM_LENGTH 1000
+static const int FRAME_S = 500;  
+static const int VAR_S = 500;
+
 struct memory_struct{
 	char *var;
 	char *value;
+
 };
 
-struct memory_struct shellmemory[1000];
+struct frame_struct{
+	  int var; 
+	  char* values[3];
+	  
+};
+
+struct frame_struct f_store[FRAME_S];
+
+struct memory_struct shellmemory[VAR_S];
 
 // Helper functions
 int match(char *model, char *var) {

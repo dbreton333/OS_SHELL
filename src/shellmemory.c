@@ -4,8 +4,8 @@
 
 
 #define SHELL_MEM_LENGTH 1000
-static const int FRAME_S = 500;  
-static const int VAR_S = 500;
+static const int FRAME_S = 1000;  
+static const int VAR_S = 1000;
 
 struct memory_struct{
 	char *var;
@@ -19,11 +19,11 @@ struct frame_struct{
 	  
 };
 
-struct frame_struct f_store[FRAME_S];
+struct frame_struct f_store[1000];
 
-struct memory_struct shellmemory[VAR_S];
+struct memory_struct shellmemory[1000];
 
-int resetmem(){
+void resetmem(){
 	for(int i=0 ; i < VAR_S ; i++ ){
 		shellmemory[i].var = "none";
 		shellmemory[i].value = "none";

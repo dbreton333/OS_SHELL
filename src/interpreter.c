@@ -153,7 +153,7 @@ run SCRIPT.TXT		Executes the file SCRIPT.TXT\n ";
 
 int quit(){
 
-	system("rm -rf backstore");
+	system("rm -rf ./backstore");
 	
 	printf("%s\n", "Bye!");
 	exit(0);
@@ -234,6 +234,15 @@ int my_ls(){
 int run(char* script){
 	int errCode = 0;
 
+	char t[100] = "cp ";
+	char w[] = " ./backstore";
+
+	strcat(t, script);
+	strcat(t, w);
+
+	system(t);
+
+
 	char line[1000]; //buffer for line
 	int var = 0; //line number
 	int size = 0; //size of program
@@ -244,6 +253,7 @@ int run(char* script){
 	tail = pcb; //set tail
 
 	if(p == NULL){
+		system("rm -rf ./backstore");	
 		return badcommandFileDoesNotExist();
 	}
 
@@ -286,15 +296,25 @@ int run(char* script){
 }
 int exec(char* script[], char* policy, int nbr){
 	int errCode = 0;
+
 	int var = 0; //line number
 	struct PCB *prev = NULL;
 	
 	for (int i = 0 ; i < nbr; i++){
 
+		char t[100] = "cp ";
+		char w[] = " ./backstore";
+
+		strcat(t, script);
+		strcat(t, w);
+
+		system(t);
+
 		FILE *p = fopen(script[i],"rt");  // open file and p points to it
 
 		if(p == NULL){
-				return badcommandFileDoesNotExist();
+			system("rm -rf ./backstore");	
+			return badcommandFileDoesNotExist();
 		}
 
 		int size = 0; //size of program

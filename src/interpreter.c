@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> 
+#include <dirent.h>
 
 
 #include "interpreter.h"
@@ -31,6 +32,7 @@ int echo(char* var);
 int my_ls();
 int exec(char* script[], char* policy, int len);
 int PID_temp = 0;
+int pindex = 1;
 
 // Interpret commands and their arguments
 int interpreter(char* command_args[], int args_size){
@@ -129,11 +131,13 @@ int interpreter(char* command_args[], int args_size){
 			programs[i-1] = strdup(command_args[i]);
 		}
 
-		for(int i = 0 ; i < args_size - 2 ; i++){
-			if((i+1<args_size - 2 && (strcmp(programs[i],programs[i+1]) == 0)) || (i+2< args_size - 2 && (strcmp(programs[i],programs[i+2]) == 0 ))){
-				return badcommandSameFileName();
-			}
-		}
+		//FILES CAN NOW HAVE THE SAME NAME
+
+		// for(int i = 0 ; i < args_size - 2 ; i++){
+		// 	if((i+1<args_size - 2 && (strcmp(programs[i],programs[i+1]) == 0)) || (i+2< args_size - 2 && (strcmp(programs[i],programs[i+2]) == 0 ))){
+		// 		return badcommandSameFileName();
+		// 	}
+		// }
 		return exec(programs, command_args[args_size-1], args_size-2);
 	}
 	else return badcommand();
@@ -232,30 +236,52 @@ int my_ls(){
 }
 
 int run(char* script){
+
 	int errCode = 0;
-
-	char t[100] = "cp ";
-	char w[] = " ./backstore";
-
-	strcat(t, script);
-	strcat(t, w);
-
-	system(t);
-
-
 	char line[1000]; //buffer for line
 	int var = 0; //line number
 	int size = 0; //size of program
-	FILE *p = fopen(script,"rt");  // open file and p points to it
+	struct dirent *dir;
+	FILE *p = NULL;
+
+	char t[100] = "cp ";
+	char w[100] = " ./backstore/prog";
+	char file[100] = "/home/2021/dbreto7/courses/ECSE427/OS_SHELL/src/backstore/";
+
+	//CHECK IF FILE EXIST
+	p = fopen(script,"rt");
+	if(p == NULL){
+		return badcommandFileDoesNotExist();
+	}
+	fclose(p);
+
+	strcat(t, script);
+	strcat(t, w);
+	char str[2];
+	sprintf(str, "%d", pindex);
+	strcat(t, str);
+	strcat(t, ".txt");
+
+	system(t);
+
+	DIR *d = opendir("./backstore");
+
+	if((dir = readdir(d)) != NULL){
+		dir = readdir(d); //skip .
+		dir = readdir(d); //skip ..
+		strcat(file, dir->d_name);
+		p = fopen(file,"rt"); // open file and p points to it
+	}
+
+	if(p == NULL){
+		system("rm -rf ./backstore");	
+		system("mkdir backstore");
+		return badcommandFileDoesNotExist();
+	}
 
 	struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
 	head = pcb; //set head
 	tail = pcb; //set tail
-
-	if(p == NULL){
-		system("rm -rf ./backstore");	
-		return badcommandFileDoesNotExist();
-	}
 
 	pcb->base = var;
 	pcb->PC = var;
@@ -291,31 +317,64 @@ int run(char* script){
 
 	//close file
 	fclose(p);
+	closedir(d);
 
 	errCode = scheduler("FCFS");
 }
+
 int exec(char* script[], char* policy, int nbr){
 	int errCode = 0;
 
 	int var = 0; //line number
 	struct PCB *prev = NULL;
+	FILE *p = NULL;
+	struct dirent *dir;
+
+
 	
 	for (int i = 0 ; i < nbr; i++){
 
-		char t[100] = "cp ";
-		char w[] = " ./backstore";
+		//CHECK IF FILE EXIST
+		p = fopen(script[i],"rt");
+		if(p == NULL){
+			return badcommandFileDoesNotExist();
+		}
+		fclose(p);
 
-		strcat(t, script);
+		char t[100] = "cp ";
+		char w[] = " ./backstore/prog";
+
+		strcat(t, script[i]);
 		strcat(t, w);
+		char str[2];
+		sprintf(str, "%d", pindex);
+		strcat(t, str);
+		strcat(t, ".txt");
 
 		system(t);
 
-		FILE *p = fopen(script[i],"rt");  // open file and p points to it
+		pindex++;
+	}
+
+		DIR *d = opendir("./backstore");
+		dir = readdir(d); //skip .
+		dir = readdir(d); //skip ..
+
+	for (int i = 0 ; i < nbr; i++){
+
+		char file[100] = "/home/2021/dbreto7/courses/ECSE427/OS_SHELL/src/backstore/";
+
+		if((dir = readdir(d)) != NULL){
+			strcat(file, dir->d_name);
+			p = fopen(file,"rt");  // open file and p points to it
+		}
 
 		if(p == NULL){
 			system("rm -rf ./backstore");	
+			system("mkdir backstore");
 			return badcommandFileDoesNotExist();
 		}
+
 
 		int size = 0; //size of program
 		char line[1000]; //buffer for line
@@ -375,6 +434,7 @@ int exec(char* script[], char* policy, int nbr){
 		//close file
 		fclose(p);
 	}
+	closedir(d);
 
 	errCode = scheduler(policy);
 	return errCode;

@@ -14,13 +14,12 @@ struct memory_struct{
 };
 
 struct frame_struct{
-	  int var; 
-	  char* values[3];
+	  char *var; 
+	  char** values;
 	  
 };
 
 struct frame_struct f_store[1000];
-
 struct memory_struct shellmemory[1000];
 
 void resetmem(){
@@ -58,9 +57,15 @@ char *extract(char *model) {
 void mem_init(){
 
 	int i;
-	for (i=0; i<1000; i++){		
+	for (i=0; i<VAR_S; i++){		
 		shellmemory[i].var = "none";
 		shellmemory[i].value = "none";
+	}
+
+	int j;
+	for (j=0; j<FRAME_S; j++){		
+		f_store[j].var = "none";
+		f_store[j].values = NULL;
 	}
 }
 
@@ -69,7 +74,7 @@ void mem_set_value(char *var_in, char *value_in) {
 	
 	int i;
 
-	for (i=0; i<1000; i++){
+	for (i=0; i<VAR_S; i++){
 		if (strcmp(shellmemory[i].var, var_in) == 0){
 			shellmemory[i].value = strdup(value_in);
 			return;
@@ -77,7 +82,7 @@ void mem_set_value(char *var_in, char *value_in) {
 	}
 
 	//Value does not exist, need to find a free spot.
-	for (i=0; i<1000; i++){
+	for (i=0; i<VAR_S; i++){
 		if (strcmp(shellmemory[i].var, "none") == 0){
 			shellmemory[i].var = strdup(var_in);
 			shellmemory[i].value = strdup(value_in);
@@ -86,14 +91,27 @@ void mem_set_value(char *var_in, char *value_in) {
 	}
 
 	return;
+}
 
+void mem_set_frame(char *var_in, char** value_in) {
+	int i;
+	//Value does not exist, need to find a free spot.
+	for (i=0; i<FRAME_S; i++){
+		if (strcmp(shellmemory[i].var, "none") == 0){
+			f_store[i].var = strdup(var_in);
+			f_store[i].values = value_in;
+			return;
+		} 
+	}
+
+	return;
 }
 
 void mem_clear(char *var_in){
-	for (int i=0; i<1000; i++){
+	for (int i=0; i<VAR_S; i++){
 		if (strcmp(shellmemory[i].var, var_in) == 0){
 			shellmemory[i].var = strdup("none");
-			return;
+			break;
 		} 
 	}
 }
@@ -102,12 +120,25 @@ void mem_clear(char *var_in){
 char *mem_get_value(char *var_in) {
 	int i;
 
-	for (i=0; i<1000; i++){
+	for (i=0; i<VAR_S; i++){
 		if (strcmp(shellmemory[i].var, var_in) == 0){
 
 			return strdup(shellmemory[i].value);
 		} 
 	}
 	return "Variable does not exist";
+
+}
+
+char** mem_get_frame(char *var_in) {
+	int i;
+
+	for (i=0; i<FRAME_S; i++){
+		if (strcmp(f_store[i].var, var_in) == 0){
+
+			return f_store[i].values;
+		} 
+	}
+	return NULL;
 
 }

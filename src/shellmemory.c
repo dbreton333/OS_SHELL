@@ -141,7 +141,8 @@ char *mem_get_value(char *var_in) {
 void resetframemem(){
 	for (i=0; i<FRAME_S; i++){		
 		f_store[i].frame = "none";
-		char *frame[FRAME_L];
+
+		char **frame = mallloc(FRAME_L * sizeof(char*));
 
 		int j;
 		for(j = 0; j < FRAME_L; j++){
@@ -153,7 +154,7 @@ void resetframemem(){
 	}
 
 	for (i=0; i<TABLE_S; i++){		
-		pagetable[i].PID = "none";
+		pagetable[i].PID = strdup("none");
 		pagetable[i].frameno = 0;
 		pagetable[i].pageno = 0;
 	}
@@ -180,24 +181,24 @@ void mem_set_frame_value(int frameno, char* value_in) {
 int mem_get_frame_number(char *prog, int page) {
 
 	int i;
-	int index;
+	int frame;
 	int hit = 0;
 	for (i=0; i<TABLE_S; i++){
-		if(strcmp(pagetable[i].PID,prog)){
+		if(strcmp(pagetable[i].PID,prog) == 0){
 			if(pagetable[i].pageno == page){
-				index = pagetable[i].frameno;
+				frame = pagetable[i].frameno;
 				hit = 1;
 			}
 		}
 	}
 	
 	if(hit = 0){
-		index = mem_get_new_frame();
-		mem_set_page_table(prog,page);
+		frame = mem_get_new_frame();
+		mem_set_page_table(prog,page,frame);
 	}
 	//if NO Hit find page in memory
 
-	return index;
+	return frame;
 }
 
 void mem_set_page_value(char *prog, int page, char *value_in){ //could return success or not
@@ -224,7 +225,12 @@ char *mem_get_page_value(char* prog, int page, int line){
 }
 
 
-void mem_set_page_table(char *prog, int page) {
-
-
+void mem_set_page_table(char *prog, int page, int frame) {
+	for (i=0; i<TABLE_S; i++){
+		if(strcmp(pagetable[i].PID,"none") == 0){
+			pagetable[i].PID = strdup(prog);
+			pagetable[i].pageno = page;
+			pagetable[i].frameno = frame;
+		}
+	}
 }

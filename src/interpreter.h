@@ -3,8 +3,8 @@ int help();
 
 struct PCB {
 	int PID;
-	int base;
 	int PC;
+	int frame;
 	int length;
 	int score;
 	struct PCB *next;

@@ -5,7 +5,9 @@
 
 #define SHELL_MEM_LENGTH 1000
 static const int FRAME_S = 1000;  
+static const int FRAME_L = 3;
 static const int VAR_S = 1000;
+static const int TABLE_S = 1000;
 
 struct memory_struct{
 	char *var;
@@ -14,13 +16,20 @@ struct memory_struct{
 };
 
 struct frame_struct{
-	  char *var; 
-	  char** values;
+	  char *prog; 
+	  char **values;
 	  
+};
+
+struct page_table{
+	  char *prog; 
+	  int frame;
+	  int memory; 
 };
 
 struct frame_struct f_store[1000];
 struct memory_struct shellmemory[1000];
+struct page_table pageTable[1000];
 
 void resetmem(){
 	for(int i=0 ; i < VAR_S ; i++ ){
@@ -61,11 +70,17 @@ void mem_init(){
 		shellmemory[i].var = "none";
 		shellmemory[i].value = "none";
 	}
+	for (i=0; i<FRAME_S; i++){		
+		f_store[i].prog = "none";
+		char *frame[FRAME_L];
 
-	int j;
-	for (j=0; j<FRAME_S; j++){		
-		f_store[j].var = "none";
-		f_store[j].values = NULL;
+		int j;
+		for(j = 0; j < FRAME_L; j++){
+			frame[j] = strdup("none");
+		}
+
+		f_store[i].values = frame;
+		
 	}
 }
 
@@ -93,21 +108,49 @@ void mem_set_value(char *var_in, char *value_in) {
 	return;
 }
 
-void mem_set_frame(char *var_in, char** value_in) {
+int mem_set_frame_value(int var_in, char *prog, char* value_in) {
+
+
+	if (strcmp(f_store[var_in].prog, prog) == 0){
+		int j;
+		for(j = 0; j < FRAME_L; j++){
+			if(strcmp(f_store[var_in].values[j], "none") == 0){
+				f_store[var_in].values[j] = strdup(value_in);
+				return var_in;
+			}
+		}
+	} 
+
 	int i;
-	//Value does not exist, need to find a free spot.
+
+	//frame does not exist, need to find a free spot.
 	for (i=0; i<FRAME_S; i++){
-		if (strcmp(shellmemory[i].var, "none") == 0){
-			f_store[i].var = strdup(var_in);
-			f_store[i].values = value_in;
-			return;
+		if (strcmp(f_store[i].prog, "none") == 0){
+			f_store[i].prog = prog;
+			int j;
+			for(j = 0; j < FRAME_L; j++){
+				if(strcmp(f_store[i].values[j], "none") == 0){
+					f_store[i].values[j] = strdup(value_in);
+					return i;
+				}
+			}
+			return i;
 		} 
 	}
 
-	return;
+	return i;
 }
 
 void mem_clear(char *var_in){
+	for (int i=0; i<VAR_S; i++){
+		if (strcmp(shellmemory[i].var, var_in) == 0){
+			shellmemory[i].var = strdup("none");
+			break;
+		} 
+	}
+}
+
+void mem_clear_prog(char *var_in){
 	for (int i=0; i<VAR_S; i++){
 		if (strcmp(shellmemory[i].var, var_in) == 0){
 			shellmemory[i].var = strdup("none");
@@ -130,15 +173,17 @@ char *mem_get_value(char *var_in) {
 
 }
 
-char** mem_get_frame(char *var_in) {
+char *mem_get_frame_value(char *prog, int frame, int index) {
 	int i;
-
-	for (i=0; i<FRAME_S; i++){
-		if (strcmp(f_store[i].var, var_in) == 0){
-
-			return f_store[i].values;
-		} 
+	int line;
+	for (i=0; i<TABLE_S; i++){
+		if(strcmp(pageTable[i].prog,prog)){
+			if(pageTable[i].frame == frame){
+				line = pageTable[i].memory;
+			}
+		}
 	}
-	return NULL;
+
+	return f_store[line].values[index];
 
 }

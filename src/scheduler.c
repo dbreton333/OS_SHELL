@@ -118,11 +118,16 @@ int SJF(){
 	while (tmp != NULL){
 		
 		int index = tmp->PC;
+		int frame = tmp->frame;
+		int PID = tmp->PID;
 		//looping through each program
-		for (int i = index; i < (tmp->length + tmp->base); i++){
-			char index[4];	
-			sprintf(index,"%d",i);
-			char* userInput = mem_get_value(index);
+		for (int i = index; i < (tmp->length); i++){
+			
+			char prog[4];	
+			sprintf(prog,"%d",PID);
+			
+			char* userInput = mem_get_frame_value(prog, frame, index);
+
 			char* token;
 			char** liToken =  malloc(10 * sizeof(char*));;
 			int k = 0;
@@ -172,13 +177,16 @@ int RR(){
 
 	while(head != NULL){
 		int index = pcb->PC;
+		int frame = pcb->frame;
+		int PID = pcb->PID;
 		//looping through each program and running two instructions per program
-		for (int i = index; (i < index + 2) && (i < (pcb->length + pcb->base)); i++){
+		for (int i = index; (i < index + 2) && (i < (pcb->length)); i++){
 			
-			char index[4];	
-			sprintf(index,"%d",i);
+			char prog[4];	
+			sprintf(prog,"%d",PID);
 			
-			char* userInput = mem_get_value(index);
+			char* userInput = mem_get_frame_value(prog, frame, index);
+
 			char* token;
 			char** liToken =  malloc(10 * sizeof(char*));;
 			int k = 0;
@@ -216,9 +224,10 @@ int RR(){
 			pcb->PC += 1;
 		}
 		//clear pcb when pcb reaches the end
-		if(pcb->PC == (pcb->length + pcb->base)){
+		if(pcb->PC == (pcb->length)){
 			PCB_clear(pcb);
 		}
+
 		pcb = pcb->back;
 
 		if(pcb == NULL){
@@ -289,7 +298,7 @@ int AGING(){
 		free(liToken);
 		head->PC += 1;
 
-		if(head->PC == (head->length + head->base)){
+		if(head->PC == (head->length)){
 			PCB_clear(head);
 		}
 		decrement();
@@ -304,14 +313,17 @@ int FCFS(){
 	struct PCB* pcb = head;
 
 	while(pcb != NULL){
-		int index = pcb->PC;
-		//looping through each program 
-		for (int i = index; i < (pcb->length + pcb->base); i++){
-	
-			char index[4];	
-			sprintf(index,"%d",i);
+		int index = pcb->PC;		
+		int frame = pcb->frame;
+		int PID = pcb->PID;
+		//looping through each program
+		for (int i = index; i < (pcb->length); i++){
 			
-			char* userInput = mem_get_value(index);
+			char prog[4];	
+			sprintf(prog,"%d",PID);
+			
+			char* userInput = mem_get_frame_value(prog, frame, index);
+			
 			char* token;
 			char** liToken =  malloc(10 * sizeof(char*));;
 			int k = 0;

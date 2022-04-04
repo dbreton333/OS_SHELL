@@ -33,6 +33,8 @@ int my_ls();
 int exec(char* script[], char* policy, int len);
 int PID_temp = 0;
 int pindex = 1;
+int FRAME_L = 3;
+int current_frame_index = 0;
 
 // Interpret commands and their arguments
 int interpreter(char* command_args[], int args_size){
@@ -239,7 +241,6 @@ int run(char* script){
 
 	int errCode = 0;
 	char line[1000]; //buffer for line
-	int var = 0; //line number
 	int size = 0; //size of program
 	struct dirent *dir;
 	FILE *p = NULL;
@@ -257,9 +258,9 @@ int run(char* script){
 
 	strcat(t, script);
 	strcat(t, w);
-	char str[2];
-	sprintf(str, "%d", pindex);
-	strcat(t, str);
+	char prognb[2];
+	sprintf(prognb, "%d", PID_temp);
+	strcat(t, prognb);
 	strcat(t, ".txt");
 
 	system(t);
@@ -283,8 +284,7 @@ int run(char* script){
 	head = pcb; //set head
 	tail = pcb; //set tail
 
-	pcb->base = var;
-	pcb->PC = var;
+	pcb->PC = 0;
 	pcb->next = NULL;
 	pcb->PID = PID_temp;
 	PID_temp++;
@@ -294,12 +294,8 @@ int run(char* script){
 
 	while(1){
 
-		char buffer[4]; //string buffer for integer conversion
-		sprintf(buffer,"%d",var); //copy integer as a string ex: 1 -> "1"
-
-		set(buffer, line); //set line to line number as variable
+		current_frame_index = mem_set_frame_value(current_frame_index,prognb, line); //set line in a frame corresponding to the program number
 	
-		var++; //increment line number
 		size++; //increment size of program
 
 		//if end of file break
@@ -325,10 +321,11 @@ int run(char* script){
 int exec(char* script[], char* policy, int nbr){
 	int errCode = 0;
 
-	int var = 0; //line number
 	struct PCB *prev = NULL;
 	FILE *p = NULL;
 	struct dirent *dir;
+	char *prognbrs[nbr];
+	int *Iprognbrs[nbr];
 
 
 	
@@ -346,14 +343,17 @@ int exec(char* script[], char* policy, int nbr){
 
 		strcat(t, script[i]);
 		strcat(t, w);
-		char str[2];
-		sprintf(str, "%d", pindex);
-		strcat(t, str);
+		char prognb[2];
+
+		sprintf(prognb, "%d", PID_temp);
+		prognbrs[i] = strdup(prognb);
+		Iprognbrs[i] = PID_temp;
+		strcat(t, prognb);
 		strcat(t, ".txt");
 
 		system(t);
 
-		pindex++;
+		PID_temp++;
 	}
 
 		DIR *d = opendir("./backstore");
@@ -385,22 +385,17 @@ int exec(char* script[], char* policy, int nbr){
 			head = pcb; //set head
 			tail = pcb; //set tail
 
-			pcb->base = var;
-			pcb->PC = var;
 			pcb->next = NULL;
-			pcb->PID = PID_temp;
-			PID_temp++;
+			pcb->PID = Iprognbrs[i];
 			pcb->back = NULL;
 			prev = pcb ;
 		}
 		else{ 
 			tail = pcb ;
 
-			pcb->base = var;
-			pcb->PC = var;
+			pcb->PC = 0;
 			pcb->next = prev;
-			pcb->PID = PID_temp;
-			PID_temp++;
+			pcb->PID = Iprognbrs[i];
 			pcb->back = NULL;
 			prev->back = pcb;
 			prev = pcb;
@@ -410,12 +405,8 @@ int exec(char* script[], char* policy, int nbr){
 
 		while(1){
 
-			char buffer[4]; //string buffer for integer conversion
-			sprintf(buffer,"%d",var); //copy integer as a string ex: 1 -> "1"
+			current_frame_index = mem_set_frame_value(current_frame_index, prognbrs[i], line);
 
-			set(buffer, line); //set line to line number as variable
-		
-			var++; //increment line number
 			size++; //increment size of program
 
 			//if end of file break
@@ -441,13 +432,7 @@ int exec(char* script[], char* policy, int nbr){
 }
 
 int PCB_clear(struct PCB* pcb){
- //clear the PCB in the shell memory
  //remove PCB from QUEUE
- char index[4];	
- for(int i = pcb->base; i < pcb->length; i++){
-	sprintf(index,"%d",i);
-	mem_clear(index);
- }
 
  if(pcb->back != NULL){
 	 if(pcb->next != NULL){

@@ -122,18 +122,18 @@ int SJF(){
 		int PID = tmp->PID;
 		int currpage = tmp->currpage;
 		//looping through each program
+		char prog[4];	
+		sprintf(prog,"%d",PID);
 
 		for (int i = index; i < (tmp->length); i++){
-			
-			char prog[4];	
-			sprintf(prog,"%d",PID);
-			
-			char* userInput = mem_get_page_value(prog, currpage, i%FRAME_L);
 
-			if(i % FRAME_L == 0){
+			if((i % FRAME_L == 0) && (i != 0)){
 				currpage++;
-				tmp->currpage = currpage++;
+				tmp->currpage = currpage;
 			}
+			
+			char* userInput = mem_get_page_value(prog, currpage, i % FRAME_L);
+
 
 			char* token;
 			char** liToken =  malloc(10 * sizeof(char*));;
@@ -192,13 +192,13 @@ int RR(){
 			
 			char prog[4];	
 			sprintf(prog,"%d",PID);
+
+			if((i % FRAME_L == 0) && (i != 0)){
+				currpage++;
+				tmp->currpage = currpage;
+			}
 			
 			char* userInput = mem_get_page_value(prog, currpage, i%FRAME_L);
-
-			if(i % FRAME_L == 0){
-				currpage++;
-				tmp->currpage = currpage++;
-			}
 
 			char* token;
 			char** liToken =  malloc(10 * sizeof(char*));;
@@ -280,6 +280,11 @@ int AGING(){
 		char prog[4];	
 		sprintf(prog,"%d",PID);
 
+		if((index % FRAME_L == 0) && (index != 0)){
+			currpage++;
+			tmp->currpage = currpage;
+		}
+
 		char* userInput = mem_get_page_value(prog,currpage,index);
 
 		char* token;
@@ -342,14 +347,14 @@ int FCFS(){
 			
 			char prog[4];	
 			sprintf(prog,"%d",PID);
+
+			if((i % FRAME_L == 0) && (i != 0)){
+				currpage++;
+				tmp->currpage = currpage;
+			}
 			
 			char* userInput = mem_get_page_value(prog, currpage, i%FRAME_L);
 
-			
-			if(i % FRAME_L == 0){
-				currpage++;
-				tmp->currpage = currpage++;
-			}
 			
 			char* token;
 			char** liToken =  malloc(10 * sizeof(char*));;

@@ -13,7 +13,7 @@ void mem_clear_frame(char *var_in);
 void mem_set_frame_value(int frameno, char* value_in);
 int mem_get_frame_number(char *prog, int page);
 void mem_set_page_value(char *prog, int page, char *value_in);
-int mem_get_empty_frame();
+int mem_get_new_frame();
 char *mem_get_frame_value(int frameno,int line);
 char *mem_get_page_value(char* prog, int page, int line);
 void mem_set_page_table();
@@ -186,7 +186,7 @@ int mem_get_frame_number(char *prog, int page) {
 	}
 	
 	if(hit = 0){
-		index = mem_get_empty_frame();
+		index = mem_get_new_frame();
 		mem_set_page_table(prog,page);
 	}
 	//if NO Hit find page in memory
@@ -194,12 +194,12 @@ int mem_get_frame_number(char *prog, int page) {
 	return index;
 }
 
-void mem_set_page_value(char *prog, int page, char *value_in){
+void mem_set_page_value(char *prog, int page, char *value_in){ //could return success or not
 	int frame = mem_get_frame_number(prog, page);
 	mem_set_frame_value(frame, value_in);
 }
 
-int mem_get_empty_frame(){ //Gets first empty frame
+int mem_get_new_frame(){ //Gets first empty frame
 	int frameno;
 	for (frameno=0; frameno<FRAME_S; frameno++){
 		if (strcmp(f_store[frameno].frame, "none") == 0){

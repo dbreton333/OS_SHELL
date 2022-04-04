@@ -298,13 +298,14 @@ int run(char* script){
 
 	while(1){
 
-		mem_set_page_value(prognb, page, line);  //set line in a frame corresponding to the program number
+		if(((size % FRAME_L) == 0) && (size != 0)){
+			page++;
+		}
+
+		mem_set_page_value(prognb, page, line);  //set line in corresponding page
 	
 		size++; //increment size of program
 
-		if((size % FRAME_L) == 0){
-			page++;
-		}
 
 		//if end of file break
 		if(feof(p)){
@@ -418,13 +419,14 @@ int exec(char* script[], char* policy, int nbr){
 
 		while(1){
 
-			mem_set_page_value(prognbrs[i], page, line);  //set line in a frame corresponding to the program number
+			if(((size % FRAME_L) == 0) && (size != 0)){
+				page++;
+			}
+
+			mem_set_page_value(prognbrs[i], page, line);  //set line in corresponding page
 	
 			size++; //increment size of program
 
-			if((size % FRAME_L) == 0){
-				page++;
-			}
 
 
 			//if end of file break

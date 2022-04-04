@@ -1,28 +1,12 @@
 #include<stdlib.h>
 #include<string.h>
 #include<stdio.h>
-
-void resetmem();
-int match(char *model, char *var);
-char *extract(char *model);
-void mem_init();
-void mem_set_value(char *var_in, char *value_in);
-void mem_clear(char *var_in);
-char *mem_get_value(char *var_in);
-void mem_clear_frame(char *var_in);
-void mem_set_frame_value(int frameno, char* value_in);
-int mem_get_frame_number(char *prog, int page);
-void mem_set_page_value(char *prog, int page, char *value_in);
-int mem_get_new_frame();
-char *mem_get_frame_value(int frameno,int line);
-char *mem_get_page_value(char* prog, int page, int line);
-void mem_set_page_table();
+#include "shellmemory.h"
 
 
 
 #define SHELL_MEM_LENGTH 1000
 static const int FRAME_S = 1000;  
-static const int FRAME_L = 3;
 static const int VAR_S = 1000;
 static const int TABLE_S = 1000;
 

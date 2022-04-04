@@ -4,3 +4,5 @@ mysh: shell.c interpreter.c shellmemory.c scheduler.c
 
 clean: 
 	rm mysh; rm *.o
+
+

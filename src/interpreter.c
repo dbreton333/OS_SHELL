@@ -32,7 +32,6 @@ int echo(char* var);
 int my_ls();
 int exec(char* script[], char* policy, int len);
 int PID_temp = 0;
-int FRAME_L = 3;
 
 // Interpret commands and their arguments
 int interpreter(char* command_args[], int args_size){
@@ -303,9 +302,8 @@ int run(char* script){
 		}
 
 		mem_set_page_value(prognb, page, line);  //set line in corresponding page
-	
-		size++; //increment size of program
 
+		size++; //increment size of program
 
 		//if end of file break
 		if(feof(p)){
@@ -318,7 +316,7 @@ int run(char* script){
 
 	//set length of program to size
 	pcb->length = size;
-	pcb->score =size;
+	pcb->score = size;
 
 	//close file
 	fclose(p);
@@ -334,7 +332,7 @@ int exec(char* script[], char* policy, int nbr){
 	FILE *p = NULL;
 	struct dirent *dir;
 	char *prognbrs[nbr];
-	int *Iprognbrs[nbr];
+	int Iprognbrs[nbr];
 
 
 	

@@ -16,7 +16,6 @@ void sortQueueS();
 void decrement();
 struct PCB* findSmaller();
 void switchPlace(struct PCB* pcb);
-int FRAME_L = 3;
 
 int scheduler(char *policy){
 	//choosing different policies

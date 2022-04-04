@@ -71,9 +71,11 @@ void mem_init(){
 		shellmemory[i].var = "none";
 		shellmemory[i].value = "none";
 	}
+
 	for (i=0; i<FRAME_S; i++){		
 		f_store[i].frame = "none";
-		char *frame[FRAME_L];
+
+		char **frame = mallloc(FRAME_L * sizeof(char*));
 
 		int j;
 		for(j = 0; j < FRAME_L; j++){
@@ -81,7 +83,6 @@ void mem_init(){
 		}
 
 		f_store[i].values = frame;
-		
 	}
 
 	for (i=0; i<TABLE_S; i++){		
@@ -135,6 +136,27 @@ char *mem_get_value(char *var_in) {
 	}
 	return "Variable does not exist";
 
+}
+
+void resetframemem(){
+	for (i=0; i<FRAME_S; i++){		
+		f_store[i].frame = "none";
+		char *frame[FRAME_L];
+
+		int j;
+		for(j = 0; j < FRAME_L; j++){
+			frame[j] = strdup("none");
+		}
+
+		f_store[i].values = frame;
+		
+	}
+
+	for (i=0; i<TABLE_S; i++){		
+		pagetable[i].PID = "none";
+		pagetable[i].frameno = 0;
+		pagetable[i].pageno = 0;
+	}
 }
 
 void mem_clear_frame(char *var_in){
@@ -203,5 +225,6 @@ char *mem_get_page_value(char* prog, int page, int line){
 
 
 void mem_set_page_table(char *prog, int page) {
+
 
 }

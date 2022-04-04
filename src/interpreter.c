@@ -107,6 +107,7 @@ int interpreter(char* command_args[], int args_size){
 	
 	} else if (strcmp(command_args[0], "run")==0) {
 		if (args_size != 2) return badcommand();
+
 		system("rm -rf ./backstore");	
 		system("mkdir backstore");
 		int errCode = 0;
@@ -147,6 +148,7 @@ int interpreter(char* command_args[], int args_size){
 		int errCode = 0;
 		errCode = exec(programs, command_args[args_size-1], args_size-2);
 		system("rm -rf ./backstore");	
+
 		return errCode;
 	}
 	else return badcommand();
@@ -332,6 +334,7 @@ int run(char* script){
 	closedir(d);
 
 	errCode = scheduler("FCFS");
+	return errCode;
 }
 
 int exec(char* script[], char* policy, int nbr){

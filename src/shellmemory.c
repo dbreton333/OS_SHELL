@@ -32,12 +32,6 @@ struct frame_struct f_store[1000];
 struct memory_struct shellmemory[1000];
 struct page_table_struct pagetable[1000];
 
-void resetmem(){
-	for(int i=0 ; i < VAR_S ; i++ ){
-		shellmemory[i].var = "none";
-		shellmemory[i].value = "none";
-	}
-}
 
 // Helper functions
 int match(char *model, char *var) {
@@ -92,6 +86,14 @@ void mem_init(){
 	}
 }
 
+
+void resetmem(){
+	for(int i=0 ; i < VAR_S ; i++ ){
+		shellmemory[i].var = strdup("none");
+		shellmemory[i].value = strdup("none");
+	}
+}
+
 // Set key value pair
 void mem_set_value(char *var_in, char *value_in) {
 	
@@ -138,10 +140,11 @@ char *mem_get_value(char *var_in) {
 
 }
 
-void resetframemem(){
+void resetmemframe(){
 	int i;
+
 	for (i=0; i<FRAME_S; i++){		
-		f_store[i].frame = "none";
+		f_store[i].frame = strdup("none");
 
 		char **frame = mallloc(FRAME_L * sizeof(char*));
 
@@ -165,6 +168,12 @@ void mem_clear_frame(char *var_in){
 	for (int i=0; i<FRAME_S; i++){
 		if (strcmp(f_store[i].frame, var_in) == 0){
 			f_store[i].frame = strdup("none");
+			char **frame = mallloc(FRAME_L * sizeof(char*));
+			int j;
+			for(j = 0; j < FRAME_L; j++){
+				frame[j] = strdup("none");
+			}
+			f_store[i].values = frame;
 			break;
 		} 
 	}
@@ -217,7 +226,7 @@ int mem_get_new_frame(){ //Gets first empty frame
 }
 
 char *mem_get_frame_value(int frameno,int line) {
-	return f_store[frameno].values[line];
+	return strdup(f_store[frameno].values[line]);
 }
 
 char *mem_get_page_value(char* prog, int page, int line){

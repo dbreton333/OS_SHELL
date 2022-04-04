@@ -1,10 +1,12 @@
-void resetmem();
+
 int match(char *model, char *var);
 char *extract(char *model);
 void mem_init();
+void resetmem();
 void mem_set_value(char *var_in, char *value_in);
 void mem_clear(char *var_in);
 char *mem_get_value(char *var_in);
+void resetmemframe();
 void mem_clear_frame(char *var_in);
 void mem_set_frame_value(int frameno, char* value_in);
 int mem_get_frame_number(char *prog, int page);

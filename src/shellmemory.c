@@ -139,6 +139,7 @@ char *mem_get_value(char *var_in) {
 }
 
 void resetframemem(){
+	int i;
 	for (i=0; i<FRAME_S; i++){		
 		f_store[i].frame = "none";
 
@@ -226,6 +227,7 @@ char *mem_get_page_value(char* prog, int page, int line){
 
 
 void mem_set_page_table(char *prog, int page, int frame) {
+	int i;
 	for (i=0; i<TABLE_S; i++){
 		if(strcmp(pagetable[i].PID,"none") == 0){
 			pagetable[i].PID = strdup(prog);

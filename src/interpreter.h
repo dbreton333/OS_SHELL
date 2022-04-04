@@ -4,7 +4,8 @@ int help();
 struct PCB {
 	int PID;
 	int PC;
-	int frame;
+	int page;
+	int currpage;
 	int length;
 	int score;
 	struct PCB *next;

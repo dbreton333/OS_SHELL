@@ -2,6 +2,23 @@
 #include<string.h>
 #include<stdio.h>
 
+void resetmem();
+int match(char *model, char *var);
+char *extract(char *model);
+void mem_init();
+void mem_set_value(char *var_in, char *value_in);
+void mem_clear(char *var_in);
+char *mem_get_value(char *var_in);
+void mem_clear_frame(char *var_in);
+void mem_set_frame_value(int frameno, char* value_in);
+int mem_get_frame_number(char *prog, int page);
+void mem_set_page_value(char *prog, int page, char *value_in);
+int mem_get_empty_frame();
+char *mem_get_frame_value(int frameno,int line);
+char *mem_get_page_value(char* prog, int page, int line);
+void mem_set_page_table();
+
+
 
 #define SHELL_MEM_LENGTH 1000
 static const int FRAME_S = 1000;  
@@ -16,20 +33,20 @@ struct memory_struct{
 };
 
 struct frame_struct{
-	  char *prog; 
+	  char *frame; 
 	  char **values;
 	  
 };
 
-struct page_table{
-	  char *prog; 
-	  int frame;
-	  int memory; 
+struct page_table_struct{
+	  char *PID; 
+	  int pageno;
+	  int frameno; 
 };
 
 struct frame_struct f_store[1000];
 struct memory_struct shellmemory[1000];
-struct page_table pageTable[1000];
+struct page_table_struct pagetable[1000];
 
 void resetmem(){
 	for(int i=0 ; i < VAR_S ; i++ ){
@@ -71,7 +88,7 @@ void mem_init(){
 		shellmemory[i].value = "none";
 	}
 	for (i=0; i<FRAME_S; i++){		
-		f_store[i].prog = "none";
+		f_store[i].frame = "none";
 		char *frame[FRAME_L];
 
 		int j;
@@ -81,6 +98,12 @@ void mem_init(){
 
 		f_store[i].values = frame;
 		
+	}
+
+	for (i=0; i<TABLE_S; i++){		
+		pagetable[i].PID = "none";
+		pagetable[i].frameno = 0;
+		pagetable[i].pageno = 0;
 	}
 }
 
@@ -108,49 +131,7 @@ void mem_set_value(char *var_in, char *value_in) {
 	return;
 }
 
-int mem_set_frame_value(int var_in, char *prog, char* value_in) {
-
-
-	if (strcmp(f_store[var_in].prog, prog) == 0){
-		int j;
-		for(j = 0; j < FRAME_L; j++){
-			if(strcmp(f_store[var_in].values[j], "none") == 0){
-				f_store[var_in].values[j] = strdup(value_in);
-				return var_in;
-			}
-		}
-	} 
-
-	int i;
-
-	//frame does not exist, need to find a free spot.
-	for (i=0; i<FRAME_S; i++){
-		if (strcmp(f_store[i].prog, "none") == 0){
-			f_store[i].prog = prog;
-			int j;
-			for(j = 0; j < FRAME_L; j++){
-				if(strcmp(f_store[i].values[j], "none") == 0){
-					f_store[i].values[j] = strdup(value_in);
-					return i;
-				}
-			}
-			return i;
-		} 
-	}
-
-	return i;
-}
-
 void mem_clear(char *var_in){
-	for (int i=0; i<VAR_S; i++){
-		if (strcmp(shellmemory[i].var, var_in) == 0){
-			shellmemory[i].var = strdup("none");
-			break;
-		} 
-	}
-}
-
-void mem_clear_prog(char *var_in){
 	for (int i=0; i<VAR_S; i++){
 		if (strcmp(shellmemory[i].var, var_in) == 0){
 			shellmemory[i].var = strdup("none");
@@ -165,7 +146,6 @@ char *mem_get_value(char *var_in) {
 
 	for (i=0; i<VAR_S; i++){
 		if (strcmp(shellmemory[i].var, var_in) == 0){
-
 			return strdup(shellmemory[i].value);
 		} 
 	}
@@ -173,17 +153,71 @@ char *mem_get_value(char *var_in) {
 
 }
 
-char *mem_get_frame_value(char *prog, int frame, int index) {
+void mem_clear_frame(char *var_in){
+	for (int i=0; i<FRAME_S; i++){
+		if (strcmp(f_store[i].frame, var_in) == 0){
+			f_store[i].frame = strdup("none");
+			break;
+		} 
+	}
+}
+
+void mem_set_frame_value(int frameno, char* value_in) {
+	int j;
+	for(j = 0; j < FRAME_L; j++){
+		if(strcmp(f_store[frameno].values[j], "none") == 0){
+			f_store[frameno].values[j] = strdup(value_in);
+		}
+	}
+}
+
+int mem_get_frame_number(char *prog, int page) {
+
 	int i;
-	int line;
+	int index;
+	int hit = 0;
 	for (i=0; i<TABLE_S; i++){
-		if(strcmp(pageTable[i].prog,prog)){
-			if(pageTable[i].frame == frame){
-				line = pageTable[i].memory;
+		if(strcmp(pagetable[i].PID,prog)){
+			if(pagetable[i].pageno == page){
+				index = pagetable[i].frameno;
+				hit = 1;
 			}
 		}
 	}
+	
+	if(hit = 0){
+		index = mem_get_empty_frame();
+		mem_set_page_table(prog,page);
+	}
+	//if NO Hit find page in memory
 
-	return f_store[line].values[index];
+	return index;
+}
+
+void mem_set_page_value(char *prog, int page, char *value_in){
+	int frame = mem_get_frame_number(prog, page);
+	mem_set_frame_value(frame, value_in);
+}
+
+int mem_get_empty_frame(){ //Gets first empty frame
+	int frameno;
+	for (frameno=0; frameno<FRAME_S; frameno++){
+		if (strcmp(f_store[frameno].frame, "none") == 0){
+			return frameno; //returm frame index
+		} 
+	}
+}
+
+char *mem_get_frame_value(int frameno,int line) {
+	return f_store[frameno].values[line];
+}
+
+char *mem_get_page_value(char* prog, int page, int line){
+	int frame = mem_get_frame_number(prog,page);
+	return mem_get_frame_value(frame,line);
+}
+
+
+void mem_set_page_table(char *prog, int page) {
 
 }

@@ -32,9 +32,7 @@ int echo(char* var);
 int my_ls();
 int exec(char* script[], char* policy, int len);
 int PID_temp = 0;
-int pindex = 1;
 int FRAME_L = 3;
-int current_frame_index = 0;
 
 // Interpret commands and their arguments
 int interpreter(char* command_args[], int args_size){
@@ -140,6 +138,7 @@ int interpreter(char* command_args[], int args_size){
 		// 		return badcommandSameFileName();
 		// 	}
 		// }
+
 		return exec(programs, command_args[args_size-1], args_size-2);
 	}
 	else return badcommand();
@@ -239,12 +238,12 @@ int my_ls(){
 
 int run(char* script){
 
+	//INITIALISE
 	int errCode = 0;
 	char line[1000]; //buffer for line
 	int size = 0; //size of program
 	struct dirent *dir;
 	FILE *p = NULL;
-
 	char t[100] = "cp ";
 	char w[100] = " ./backstore/prog";
 	char file[100] = "/home/2021/dbreto7/courses/ECSE427/OS_SHELL/src/backstore/";
@@ -256,6 +255,7 @@ int run(char* script){
 	}
 	fclose(p);
 
+	//COPY FILE IN BACKSORE
 	strcat(t, script);
 	strcat(t, w);
 	char prognb[2];
@@ -267,6 +267,7 @@ int run(char* script){
 
 	DIR *d = opendir("./backstore");
 
+	//OPEN FILE FROM BACKSTORE
 	if((dir = readdir(d)) != NULL){
 		dir = readdir(d); //skip .
 		dir = readdir(d); //skip ..
@@ -274,6 +275,7 @@ int run(char* script){
 		p = fopen(file,"rt"); // open file and p points to it
 	}
 
+	//CHECK IF FILE IN BACKSTORE
 	if(p == NULL){
 		system("rm -rf ./backstore");	
 		system("mkdir backstore");
@@ -290,13 +292,19 @@ int run(char* script){
 	PID_temp++;
 	pcb->back = NULL;
 
+	int page = 0;
+
 	fgets(line,999,p);
 
 	while(1){
 
-		current_frame_index = mem_set_frame_value(current_frame_index,prognb, line); //set line in a frame corresponding to the program number
+		mem_set_page_value(prognb, page, line);  //set line in a frame corresponding to the program number
 	
 		size++; //increment size of program
+
+		if((size % FRAME_L) == 0){
+			page++;
+		}
 
 		//if end of file break
 		if(feof(p)){
@@ -348,12 +356,12 @@ int exec(char* script[], char* policy, int nbr){
 		sprintf(prognb, "%d", PID_temp);
 		prognbrs[i] = strdup(prognb);
 		Iprognbrs[i] = PID_temp;
+		PID_temp++;
 		strcat(t, prognb);
 		strcat(t, ".txt");
 
 		system(t);
 
-		PID_temp++;
 	}
 
 		DIR *d = opendir("./backstore");
@@ -385,6 +393,8 @@ int exec(char* script[], char* policy, int nbr){
 			head = pcb; //set head
 			tail = pcb; //set tail
 
+			pcb->PC = 0;
+			pcb->currpage = 0;
 			pcb->next = NULL;
 			pcb->PID = Iprognbrs[i];
 			pcb->back = NULL;
@@ -394,6 +404,7 @@ int exec(char* script[], char* policy, int nbr){
 			tail = pcb ;
 
 			pcb->PC = 0;
+			pcb->currpage = 0;
 			pcb->next = prev;
 			pcb->PID = Iprognbrs[i];
 			pcb->back = NULL;
@@ -401,13 +412,20 @@ int exec(char* script[], char* policy, int nbr){
 			prev = pcb;
 		}
 
+		int page = 0;
+
 		fgets(line,999,p);
 
 		while(1){
 
-			current_frame_index = mem_set_frame_value(current_frame_index, prognbrs[i], line);
-
+			mem_set_page_value(prognbrs[i], page, line);  //set line in a frame corresponding to the program number
+	
 			size++; //increment size of program
+
+			if((size % FRAME_L) == 0){
+				page++;
+			}
+
 
 			//if end of file break
 			if(feof(p)){
@@ -419,6 +437,7 @@ int exec(char* script[], char* policy, int nbr){
 		}
 
 		//set length of program to size
+		pcb->page = page;
 		pcb->length = size;
 		pcb->score = size;
 

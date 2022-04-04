@@ -16,6 +16,7 @@ void sortQueueS();
 void decrement();
 struct PCB* findSmaller();
 void switchPlace(struct PCB* pcb);
+int FRAME_L = 3;
 
 int scheduler(char *policy){
 	//choosing different policies
@@ -118,15 +119,21 @@ int SJF(){
 	while (tmp != NULL){
 		
 		int index = tmp->PC;
-		int frame = tmp->frame;
 		int PID = tmp->PID;
+		int currpage = tmp->currpage;
 		//looping through each program
+
 		for (int i = index; i < (tmp->length); i++){
 			
 			char prog[4];	
 			sprintf(prog,"%d",PID);
 			
-			char* userInput = mem_get_frame_value(prog, frame, index);
+			char* userInput = mem_get_page_value(prog, currpage, i%FRAME_L);
+
+			if(i % FRAME_L == 0){
+				currpage++;
+				tmp->currpage = currpage++;
+			}
 
 			char* token;
 			char** liToken =  malloc(10 * sizeof(char*));;
@@ -173,19 +180,25 @@ int SJF(){
 
 int RR(){
 	int errCode = 0;
-	struct PCB* pcb = head;
+	struct PCB* tmp = head;
 
 	while(head != NULL){
-		int index = pcb->PC;
-		int frame = pcb->frame;
-		int PID = pcb->PID;
+
+		int index = tmp->PC;
+		int PID = tmp->PID;
+		int currpage = tmp->currpage;
 		//looping through each program and running two instructions per program
-		for (int i = index; (i < index + 2) && (i < (pcb->length)); i++){
+		for (int i = index; (i < index + 2) && (i < (tmp->length)); i++){
 			
 			char prog[4];	
 			sprintf(prog,"%d",PID);
 			
-			char* userInput = mem_get_frame_value(prog, frame, index);
+			char* userInput = mem_get_page_value(prog, currpage, i%FRAME_L);
+
+			if(i % FRAME_L == 0){
+				currpage++;
+				tmp->currpage = currpage++;
+			}
 
 			char* token;
 			char** liToken =  malloc(10 * sizeof(char*));;
@@ -221,17 +234,17 @@ int RR(){
 			}
 			free(liToken);
 
-			pcb->PC += 1;
+			tmp->PC += 1;
 		}
-		//clear pcb when pcb reaches the end
-		if(pcb->PC == (pcb->length)){
-			PCB_clear(pcb);
+		//clear tmp when tmp reaches the end
+		if(tmp->PC == (tmp->length)){
+			PCB_clear(tmp);
 		}
 
-		pcb = pcb->back;
+		tmp = tmp->back;
 
-		if(pcb == NULL){
-			pcb = head;
+		if(tmp == NULL){
+			tmp = head;
 		}
 	}
 	return errCode;
@@ -258,9 +271,17 @@ int AGING(){
 	
 	while(head != NULL){
 
-		char index[4];	
-		sprintf(index,"%d",head->PC);
-		char* userInput = mem_get_value(index);
+		struct PCB* tmp = head;
+		int index = tmp->PC;
+		int PID = tmp->PID;
+		int currpage = tmp->currpage;
+		
+
+		char prog[4];	
+		sprintf(prog,"%d",PID);
+
+		char* userInput = mem_get_page_value(prog,currpage,index);
+
 		char* token;
 		char** liToken =  malloc(10 * sizeof(char*));;
 		int k = 0;
@@ -310,19 +331,25 @@ int AGING(){
 
 int FCFS(){
 	int errCode = 0;
-	struct PCB* pcb = head;
+	struct PCB* tmp = head;
 
-	while(pcb != NULL){
-		int index = pcb->PC;		
-		int frame = pcb->frame;
-		int PID = pcb->PID;
+	while(tmp != NULL){
+		int index = tmp->PC;
+		int PID = tmp->PID;
+		int currpage = tmp->currpage;
 		//looping through each program
-		for (int i = index; i < (pcb->length); i++){
+		for (int i = index; i < (tmp->length); i++){
 			
 			char prog[4];	
 			sprintf(prog,"%d",PID);
 			
-			char* userInput = mem_get_frame_value(prog, frame, index);
+			char* userInput = mem_get_page_value(prog, currpage, i%FRAME_L);
+
+			
+			if(i % FRAME_L == 0){
+				currpage++;
+				tmp->currpage = currpage++;
+			}
 			
 			char* token;
 			char** liToken =  malloc(10 * sizeof(char*));;
@@ -357,11 +384,11 @@ int FCFS(){
 				memset(userInput, 0, sizeof(userInput));	
 			}
 			free(liToken);
-			pcb->PC += 1;
+			tmp->PC += 1;
 		}
-		//clear pcb when pcb reaches the end
-		PCB_clear(pcb);
-		pcb = pcb->back;
+		//clear tmp when tmp reaches the end
+		PCB_clear(tmp);
+		tmp = tmp->back;
 	}
 	return errCode;
 }

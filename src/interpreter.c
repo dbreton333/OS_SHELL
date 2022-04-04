@@ -107,7 +107,12 @@ int interpreter(char* command_args[], int args_size){
 	
 	} else if (strcmp(command_args[0], "run")==0) {
 		if (args_size != 2) return badcommand();
-		return run(command_args[1]);
+		system("rm -rf ./backstore");	
+		system("mkdir backstore");
+		int errCode = 0;
+		errCode = run(command_args[1]);
+		system("rm -rf ./backstore");	
+		return errCode;
 	
 	} else if (strcmp(command_args[0], "echo")==0) {
 		
@@ -122,7 +127,6 @@ int interpreter(char* command_args[], int args_size){
 	} else if (strcmp(command_args[0], "exec")==0) {
 	
 		if (args_size > 5) return badcommand();
-		
 		char *programs[args_size-2];
 
 
@@ -138,7 +142,12 @@ int interpreter(char* command_args[], int args_size){
 		// 	}
 		// }
 
-		return exec(programs, command_args[args_size-1], args_size-2);
+		system("rm -rf ./backstore");	
+		system("mkdir backstore");
+		int errCode = 0;
+		errCode = exec(programs, command_args[args_size-1], args_size-2);
+		system("rm -rf ./backstore");	
+		return errCode;
 	}
 	else return badcommand();
 }

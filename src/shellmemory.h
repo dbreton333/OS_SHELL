@@ -1,4 +1,3 @@
-
 int match(char *model, char *var);
 char *extract(char *model);
 void mem_init();

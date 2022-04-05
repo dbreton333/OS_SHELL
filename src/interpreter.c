@@ -88,7 +88,7 @@ int interpreter(char* command_args[], int args_size){
 			j++;
 		}
 
-		if(isDigit == 1) return badcommandDigitVariable();			
+		if(isDigit == 1) return badcommandDigitVariable();	//CAN DELETE THAT EVENTUALLY	
 		
 		//concat all the tokens together
 		char concatArgs[700]; 
@@ -306,12 +306,14 @@ int run(char* script){
 
 	fgets(line,999,p);
 
+	printf("program: %s\n",prognb);
+
 	while(1){
 
 		if(((size % FRAME_L) == 0) && (size != 0)){
 			page++;
 		}
-
+		printf("page: %d\n",page);
 		mem_set_page_value(prognb, page, line);  //set line in corresponding page
 
 		size++; //increment size of program
@@ -333,7 +335,7 @@ int run(char* script){
 	fclose(p);
 	closedir(d);
 
-	errCode = scheduler("FCFS");
+	//errCode = scheduler("FCFS");
 	return errCode;
 }
 

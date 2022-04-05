@@ -69,7 +69,7 @@ void mem_init(){
 	for (i=0; i<FRAME_S; i++){		
 		f_store[i].frame = "none";
 
-		char **frame = mallloc(FRAME_L * sizeof(char*));
+		char **frame = malloc(FRAME_L * sizeof(char*));
 
 		int j;
 		for(j = 0; j < FRAME_L; j++){
@@ -80,9 +80,10 @@ void mem_init(){
 	}
 
 	for (i=0; i<TABLE_S; i++){		
-		pagetable[i].PID = "none";
+		pagetable[i].PID = strdup("none");
 		pagetable[i].frameno = 0;
 		pagetable[i].pageno = 0;
+
 	}
 }
 
@@ -146,7 +147,7 @@ void resetmemframe(){
 	for (i=0; i<FRAME_S; i++){		
 		f_store[i].frame = strdup("none");
 
-		char **frame = mallloc(FRAME_L * sizeof(char*));
+		char **frame = malloc(FRAME_L * sizeof(char*));
 
 		int j;
 		for(j = 0; j < FRAME_L; j++){
@@ -168,7 +169,7 @@ void mem_clear_frame(char *var_in){
 	for (int i=0; i<FRAME_S; i++){
 		if (strcmp(f_store[i].frame, var_in) == 0){
 			f_store[i].frame = strdup("none");
-			char **frame = mallloc(FRAME_L * sizeof(char*));
+			char **frame = malloc(FRAME_L * sizeof(char*));
 			int j;
 			for(j = 0; j < FRAME_L; j++){
 				frame[j] = strdup("none");
@@ -196,13 +197,17 @@ int mem_get_frame_number(char *prog, int page) {
 	for (i=0; i<TABLE_S; i++){
 		if(strcmp(pagetable[i].PID,prog) == 0){
 			if(pagetable[i].pageno == page){
+				//printf("%s",prog);
+			 	printf("%s", pagetable[i].PID);
 				frame = pagetable[i].frameno;
 				hit = 1;
 			}
 		}
 	}
+
+	printf(" hit:%d\n", hit);
 	
-	if(hit = 0){
+	if(hit == 0){
 		frame = mem_get_new_frame();
 		mem_set_page_table(prog,page,frame);
 	}
@@ -213,16 +218,18 @@ int mem_get_frame_number(char *prog, int page) {
 
 void mem_set_page_value(char *prog, int page, char *value_in){ //could return success or not
 	int frame = mem_get_frame_number(prog, page);
-	mem_set_frame_value(frame, value_in);
+	printf("frame: %d\n",frame);
+	//mem_set_frame_value(frame, value_in);
 }
 
 int mem_get_new_frame(){ //Gets first empty frame
-	int frameno;
-	for (frameno=0; frameno<FRAME_S; frameno++){
+	int frameno = 4444;
+	for (frameno = 0; frameno<FRAME_S; frameno++){
 		if (strcmp(f_store[frameno].frame, "none") == 0){
 			return frameno; //returm frame index
 		} 
 	}
+	return frameno;
 }
 
 char *mem_get_frame_value(int frameno,int line) {

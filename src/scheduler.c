@@ -131,7 +131,7 @@ int SJF(){
 				tmp->currpage = currpage;
 			}
 			
-			char* userInput = mem_get_page_value(prog, currpage, i % FRAME_L);
+			char* userInput = mem_get_page_value(prog, currpage, i%FRAME_L);
 
 
 			char* token;
@@ -284,7 +284,7 @@ int AGING(){
 			tmp->currpage = currpage;
 		}
 
-		char* userInput = mem_get_page_value(prog,currpage,index);
+		char* userInput = mem_get_page_value(prog,currpage,index%FRAME_L);
 
 		char* token;
 		char** liToken =  malloc(10 * sizeof(char*));;

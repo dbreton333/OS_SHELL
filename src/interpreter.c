@@ -108,11 +108,10 @@ int interpreter(char* command_args[], int args_size){
 	} else if (strcmp(command_args[0], "run")==0) {
 		if (args_size != 2) return badcommand();
 
-		system("rm -rf ./backstore");	
-		system("mkdir backstore");
 		int errCode = 0;
 		errCode = run(command_args[1]);
-		system("rm -rf ./backstore");	
+		system("rm -rf ./backstore");
+		system("mkdir backstore");
 		return errCode;
 	
 	} else if (strcmp(command_args[0], "echo")==0) {
@@ -143,11 +142,10 @@ int interpreter(char* command_args[], int args_size){
 		// 	}
 		// }
 
-		system("rm -rf ./backstore");	
-		system("mkdir backstore");
 		int errCode = 0;
 		errCode = exec(programs, command_args[args_size-1], args_size-2);
 		system("rm -rf ./backstore");	
+		system("mkdir backstore");
 
 		return errCode;
 	}
@@ -306,14 +304,13 @@ int run(char* script){
 
 	fgets(line,999,p);
 
-	printf("program: %s\n",prognb);
 
 	while(1){
 
 		if(((size % FRAME_L) == 0) && (size != 0)){
 			page++;
 		}
-		printf("page: %d\n",page);
+
 		mem_set_page_value(prognb, page, line);  //set line in corresponding page
 
 		size++; //increment size of program
@@ -335,7 +332,7 @@ int run(char* script){
 	fclose(p);
 	closedir(d);
 
-	//errCode = scheduler("FCFS");
+	errCode = scheduler("FCFS");
 	return errCode;
 }
 

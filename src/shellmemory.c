@@ -80,7 +80,7 @@ void mem_init(){
 	}
 
 	for (i=0; i<TABLE_S; i++){		
-		pagetable[i].PID = strdup("none");
+		pagetable[i].PID = "none";
 		pagetable[i].frameno = 0;
 		pagetable[i].pageno = 0;
 
@@ -185,6 +185,7 @@ void mem_set_frame_value(int frameno, char* value_in) {
 	for(j = 0; j < FRAME_L; j++){
 		if(strcmp(f_store[frameno].values[j], "none") == 0){
 			f_store[frameno].values[j] = strdup(value_in);
+			break;
 		}
 	}
 }
@@ -196,36 +197,38 @@ int mem_get_frame_number(char *prog, int page) {
 	int hit = 0;
 	for (i=0; i<TABLE_S; i++){
 		if(strcmp(pagetable[i].PID,prog) == 0){
-			if(pagetable[i].pageno == page){
-				//printf("%s",prog);
-			 	printf("%s", pagetable[i].PID);
+		 	if(pagetable[i].pageno == page){
 				frame = pagetable[i].frameno;
 				hit = 1;
 			}
 		}
 	}
 
-	printf(" hit:%d\n", hit);
-	
 	if(hit == 0){
-		frame = mem_get_new_frame();
-		mem_set_page_table(prog,page,frame);
+
+		char pagestr[2];
+		sprintf(pagestr, "%d", page);
+
+	 	frame = mem_get_new_frame(pagestr);
+	 	mem_set_page_table(prog, page, frame);
+		 
 	}
 	//if NO Hit find page in memory
-
 	return frame;
 }
 
 void mem_set_page_value(char *prog, int page, char *value_in){ //could return success or not
 	int frame = mem_get_frame_number(prog, page);
-	printf("frame: %d\n",frame);
-	//mem_set_frame_value(frame, value_in);
+	mem_set_frame_value(frame, value_in);
 }
 
-int mem_get_new_frame(){ //Gets first empty frame
-	int frameno = 4444;
+int mem_get_new_frame(char* page){ //Gets first empty frame
+
+	//eventually if EMPTY will check for most recent
+	int frameno = 0;
 	for (frameno = 0; frameno<FRAME_S; frameno++){
 		if (strcmp(f_store[frameno].frame, "none") == 0){
+			f_store[frameno].frame = strdup("full");
 			return frameno; //returm frame index
 		} 
 	}
@@ -249,6 +252,7 @@ void mem_set_page_table(char *prog, int page, int frame) {
 			pagetable[i].PID = strdup(prog);
 			pagetable[i].pageno = page;
 			pagetable[i].frameno = frame;
+			break;
 		}
 	}
 }

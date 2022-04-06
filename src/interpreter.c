@@ -374,18 +374,14 @@ int exec(char* script[], char* policy, int nbr){
 
 	}
 
-		DIR *d = opendir("./backstore");
-		dir = readdir(d); //skip .
-		dir = readdir(d); //skip ..
-
 	for (int i = 0 ; i < nbr; i++){
 
 		char file[100] = "/home/2021/dbreto7/courses/ECSE427/OS_SHELL/src/backstore/";
 
-		if((dir = readdir(d)) != NULL){
-			strcat(file, dir->d_name);
-			p = fopen(file,"rt");  // open file and p points to it
-		}
+		strcat(file, "prog");
+		strcat(file, prognbrs[i]);
+		strcat(file, ".txt");
+		p = fopen(file,"rt");  // open file and p points to it
 
 		if(p == NULL){
 			system("rm -rf ./backstore");	
@@ -455,7 +451,6 @@ int exec(char* script[], char* policy, int nbr){
 		//close file
 		fclose(p);
 	}
-	closedir(d);
 
 	errCode = scheduler(policy);
 	return errCode;

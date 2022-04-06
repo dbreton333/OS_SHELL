@@ -7,7 +7,6 @@
 
 #define SHELL_MEM_LENGTH 1000
 
-static const int VAR_S = 1000;
 static const int TABLE_S = 1000;
 
 struct memory_struct{

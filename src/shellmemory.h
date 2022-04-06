@@ -15,5 +15,6 @@ char *mem_get_frame_value(int frameno,int line);
 char *mem_get_page_value(char* prog, int page, int line);
 void mem_set_page_table(char *prog, int page, int frame);
 
-static const int FRAME_S = 1000;//frl;
-static const int FRAME_L = 1000;//frl;
+static const int FRAME_S = FRAMESIZE;//frl;
+static const int FRAME_L = 3;//frl;
+static const int VAR_S = VARMEMSIZE;

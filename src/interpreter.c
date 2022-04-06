@@ -253,8 +253,8 @@ int run(char* script){
 	struct dirent *dir;
 	FILE *p = NULL;
 	char t[100] = "cp ";
-	char w[100] = " ./backstore/prog";
-	char file[100] = "/home/2021/dbreto7/courses/ECSE427/OS_SHELL/src/backstore/";
+	char w[100] = "backstore/prog";
+	//char file[100] = "/home/2021/dbreto7/courses/ECSE427/OS_SHELL/src/backstore/";
 
 	//CHECK IF FILE EXIST
 	p = fopen(script,"rt");
@@ -265,6 +265,7 @@ int run(char* script){
 
 	//COPY FILE IN BACKSORE
 	strcat(t, script);
+	strcat(t, " ");
 	strcat(t, w);
 	char prognb[2];
 	sprintf(prognb, "%d", PID_temp);
@@ -273,15 +274,11 @@ int run(char* script){
 
 	system(t);
 
-	DIR *d = opendir("./backstore");
 
-	//OPEN FILE FROM BACKSTORE
-	if((dir = readdir(d)) != NULL){
-		dir = readdir(d); //skip .
-		dir = readdir(d); //skip ..
-		strcat(file, dir->d_name);
-		p = fopen(file,"rt"); // open file and p points to it
-	}
+	strcat(w, prognb);
+	strcat(w, ".txt");
+
+	p = fopen(w, "rt");
 
 	//CHECK IF FILE IN BACKSTORE
 	if(p == NULL){
@@ -330,7 +327,6 @@ int run(char* script){
 
 	//close file
 	fclose(p);
-	closedir(d);
 
 	errCode = scheduler("FCFS");
 	return errCode;
@@ -357,9 +353,10 @@ int exec(char* script[], char* policy, int nbr){
 		fclose(p);
 
 		char t[100] = "cp ";
-		char w[] = " ./backstore/prog";
+		char w[] = "backstore/prog";
 
 		strcat(t, script[i]);
+		strcat(t, " ");
 		strcat(t, w);
 		char prognb[2];
 
@@ -376,7 +373,7 @@ int exec(char* script[], char* policy, int nbr){
 
 	for (int i = 0 ; i < nbr; i++){
 
-		char file[100] = "/home/2021/dbreto7/courses/ECSE427/OS_SHELL/src/backstore/";
+		char file[100] = "backstore/";
 
 		strcat(file, "prog");
 		strcat(file, prognbrs[i]);

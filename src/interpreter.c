@@ -32,6 +32,7 @@ int echo(char* var);
 int my_ls();
 int exec(char* script[], char* policy, int len);
 int PID_temp = 0;
+int loadSize = 2;
 
 // Interpret commands and their arguments
 int interpreter(char* command_args[], int args_size){
@@ -315,6 +316,10 @@ int run(char* script){
 			page++;
 		}
 
+		if(page > loadSize){
+			break;
+		}
+
 	
 
 		mem_init_page_value(prognb, page, line);  //set line in corresponding page
@@ -436,6 +441,10 @@ int exec(char* script[], char* policy, int nbr){
 
 			if(((size % FRAME_L) == 0) && (size != 0)){
 				page++;
+			}
+
+			if(page > loadSize){
+				break;
 			}
 
 			mem_init_page_value(prognbrs[i], page, line);  //set line in corresponding page

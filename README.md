@@ -24,5 +24,14 @@ Assignement 2
 
 • Implement inter-process communication with message passing.
 
+### Memory Management
+Assignement 3
 
+• We used our own code from the last assignement.
+
+• Implement the paging infrastructure.
+
+• Extend the OS Shell with demand paging.
+
+• Adding Page Replacement Policy.
 

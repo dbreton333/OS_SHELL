@@ -1,1 +1,1 @@
-exec prog10 prog11 prog12 RR
+exec ../A3-testcases_public/prog10 ../A3-testcases_public/prog11 ../A3-testcases_public/prog12 RR

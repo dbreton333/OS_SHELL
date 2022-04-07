@@ -9,19 +9,19 @@
 
 static const int TABLE_S = 1000;
 
-struct memory_struct{
+struct memory_struct{ //var memory
 	char *var;
 	char *value;
 
 };
 
-struct frame_struct{
+struct frame_struct{ //physical page memory
 	  char *frame; 
 	  char **values;
 	  
 };
 
-struct page_table_struct{
+struct page_table_struct{ //page table -> maps virtual page to physical page
 	  char *PID; 
 	  int pageno;
 	  int frameno; 
@@ -57,8 +57,9 @@ char *extract(char *model) {
 
 // Shell memory functions
 
-void mem_init(){
 
+//inits the memory for the three arrays
+void mem_init(){ 
 	int i;
 	for (i=0; i<VAR_S; i++){		
 		shellmemory[i].var = "none";
@@ -87,15 +88,15 @@ void mem_init(){
 }
 
 
-void resetmem(){
+void resetmem(){ // reset var memory
 	for(int i=0 ; i < VAR_S ; i++ ){
 		shellmemory[i].var = strdup("none");
 		shellmemory[i].value = strdup("none");
 	}
 }
 
-// Set key value pair
-void mem_set_value(char *var_in, char *value_in) {
+// Set key value pair for var
+void mem_set_value(char *var_in, char *value_in) { 
 	
 	int i;
 
@@ -105,9 +106,9 @@ void mem_set_value(char *var_in, char *value_in) {
 			return;
 		} 
 	}
-
+	
 	//Value does not exist, need to find a free spot.
-	for (i=0; i<VAR_S; i++){
+	for (i=0; i<VAR_S; i++){  
 		if (strcmp(shellmemory[i].var, "none") == 0){
 			shellmemory[i].var = strdup(var_in);
 			shellmemory[i].value = strdup(value_in);
@@ -118,6 +119,7 @@ void mem_set_value(char *var_in, char *value_in) {
 	return;
 }
 
+//clear var based on variable name
 void mem_clear(char *var_in){
 	for (int i=0; i<VAR_S; i++){
 		if (strcmp(shellmemory[i].var, var_in) == 0){
@@ -140,6 +142,7 @@ char *mem_get_value(char *var_in) {
 
 }
 
+//reset physical page memory
 void resetmemframe(){
 	int i;
 
@@ -164,21 +167,18 @@ void resetmemframe(){
 	}
 }
 
-void mem_clear_frame(char *var_in){
-	for (int i=0; i<FRAME_S; i++){
-		if (strcmp(f_store[i].frame, var_in) == 0){
-			f_store[i].frame = strdup("none");
-			char **frame = malloc(FRAME_L * sizeof(char*));
-			int j;
-			for(j = 0; j < FRAME_L; j++){
-				frame[j] = strdup("none");
-			}
-			f_store[i].values = frame;
-			break;
-		} 
-	}
+//clear frame based on frame index
+void mem_clear_frame(int frameno){
+		f_store[frameno].frame = strdup("none");
+		char **frame = malloc(FRAME_L * sizeof(char*));
+		int j;
+		for(j = 0; j < FRAME_L; j++){
+			frame[j] = strdup("none");
+		}
+		f_store[frameno].values = frame;
 }
 
+//set frame value base on frame index
 void mem_set_frame_value(int frameno, char* value_in) {
 	int j;
 	for(j = 0; j < FRAME_L; j++){
@@ -189,6 +189,7 @@ void mem_set_frame_value(int frameno, char* value_in) {
 	}
 }
 
+//get available frame index and set page table
 int mem_get_frame_number(char *prog, int page) {
 
 	int frame = mem_get_table_value(prog,page);
@@ -208,6 +209,7 @@ int mem_get_frame_number(char *prog, int page) {
 	return frame;
 }
 
+//get table value with page number and program number
 int mem_get_table_value(char *prog, int page){
 	int i;
 	int frame = -1;
@@ -222,6 +224,7 @@ int mem_get_table_value(char *prog, int page){
 	return frame;
 }
 
+//set frame value 
 int mem_init_page_value(char *prog, int page, char *value_in){ 
 	int frame = mem_get_frame_number(prog, page);
 	if(frame != -1){ //if frame == -1 mean no more space in f_Store
@@ -251,8 +254,7 @@ char *mem_get_frame_value(int frameno,int line) {
 char *mem_get_page_value(char* prog, int page, int line){
 	int frame = mem_get_table_value(prog,page);
 	if(frame == -1){
-		printf("”Page fault! Victim page contents:");
-		//need to load frome prog and set new frame
+		return strdup("”Page fault! Victim page contents:");
 	}
 	return mem_get_frame_value(frame,line);
 }

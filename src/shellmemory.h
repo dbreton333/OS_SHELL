@@ -17,8 +17,17 @@ void mem_set_page_table(char *prog, int page, int frame);
 int mem_get_new_frame();
 int mem_evict_frame();
 int mem_page_fault(char* prog, int page, int line);
-char* mem_get_and_save_page_from_backstore(char* prog,int page);
+void mem_get_and_save_page_from_backstore(int frame,char* prog,int page);
 
 static const int FRAME_L = 3;
+static const int FRAME_SIZE = FRAMESIZE;
 static const int FRAME_S = FRAMESIZE/3;
 static const int VAR_S = VARMEMSIZE;
+
+struct frames {
+	int frameno;
+	struct frames *back;
+};
+
+struct frames *MRU;
+struct frames *LRU;

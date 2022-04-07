@@ -15,4 +15,4 @@ struct PCB {
 struct PCB *head;
 struct PCB *tail;
 
-int PCB_clear(struct PCB* pcb);
+struct PCB* PCB_clear(struct PCB* pcb);

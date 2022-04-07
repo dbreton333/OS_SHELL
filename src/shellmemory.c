@@ -253,34 +253,82 @@ char *mem_get_frame_value(int frameno,int line) {
 
 //get a page value by getting the frame index and then frame value
 char *mem_get_page_value(char* prog, int page, int line){
+
 	int frame = mem_get_table_value(prog,page);
 	if(frame == -1){
-		printf("”Page fault! Victim page contents:");
+		printf("Page fault! Victim page contents:\n");
 		frame = mem_page_fault(prog, page, line);
+		return "break";
+	}else{
+		struct frames *p = (struct frames*) malloc(sizeof(struct frames));
+		if(LRU == NULL){
+			p->frameno = frame;
+			p->back = NULL;
+			LRU = p;
+			MRU = p;
+		}else{
+			MRU->back = p;
+			MRU = p;		
+		}
+	
+		return mem_get_frame_value(frame,line);
 	}
-	return mem_get_frame_value(frame,line);
+
 }
 
 
 //print line of frame and evict
 int mem_evict_frame(){
-	return 0;
+	int frame = LRU->frameno;
+	LRU = LRU->back;
+	for(int i = 0; i<FRAME_L; i++){
+		char* str = mem_get_frame_value(frame,i);
+		if(strcmp(str,"none") != 0){
+			printf("%s", str);
+		}
+	}
+	printf("End of victim page contents.\n");
+
+	mem_clear_frame(frame);
+
+	return frame;
+	
 }
 
 int mem_page_fault(char* prog, int page, int line){
-	char pagestr[2];
-	sprintf(pagestr, "%d", page);
-	int frame = mem_get_new_frame(pagestr);
+
+	int frame = mem_get_new_frame();
 	if(frame == -1){
 		frame = mem_evict_frame();
 	}
-	mem_get_and_save_page_from_backstore(prog, page);
+	mem_get_and_save_page_from_backstore(frame, prog, page);
 	mem_set_page_table(prog,page,frame);
 	return frame;
 }
 
-char* mem_get_and_save_page_from_backstore(char* prog,int page){
-	return "none";
+void mem_get_and_save_page_from_backstore(int frame,char* prog,int page){
+	FILE *p = NULL;
+	char line[1000]; //buffer for line
+	char w[100] = "backstore/prog";
+	strcat(w, prog);
+	strcat(w, ".txt");
+	p = fopen(w, "rt");
+	int i;
+	for(i=0; i<(page+1)*FRAME_L; i++){
+		fgets(line,999,p);
+	}
+
+		while(1){
+			fgets(line,999,p);
+
+			mem_set_frame_value(frame, line);
+
+			if(feof(p)){
+				break;
+			}
+		}
+	
+	
 }
 
 //set table page number, frame number  and program number

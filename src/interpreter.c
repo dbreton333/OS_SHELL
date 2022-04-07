@@ -27,7 +27,7 @@ int badcommandNoSuchPolicy();
 int badcommandSameFileName();
 int scheduler(char *policy);
 int badcommandTooManyTokens();
-int PCB_clear(struct PCB* pcb);
+struct PCB* PCB_clear(struct PCB* pcb);
 int echo(char* var);
 int my_ls();
 int exec(char* script[], char* policy, int len);
@@ -78,18 +78,21 @@ int interpreter(char* command_args[], int args_size){
 		if (args_size < 3) return badcommand(); //if the variable is set to nothing
 		char tmp[16];
 		sscanf(command_args[1],"%s", tmp);
+
+		//NO NEED TO CHECK IF VAR IS A DIGIT ANYMORE
 		//check if variable is an integer
-		int isDigit = 1;
-		int j=0;
+		// int isDigit = 1;
+		// int j=0;
 
-		while(j<strlen(tmp) && isDigit == 1){
-			if(tmp[j] <= '0' || tmp[j] >='9'){
-				isDigit = 0;
-			}
-			j++;
-		}
+		// while(j<strlen(tmp) && isDigit == 0){
+		// 	if(tmp[j] <= '0' || tmp[j] >='9'){
+		// 		isDigit = 1;
+		// 	}
+		// 	j++;
+		// }
 
-		if(isDigit == 1) return badcommandDigitVariable();	//CAN DELETE THAT EVENTUALLY	
+
+		//if(isDigit == 1) return badcommandDigitVariable();	//CAN DELETE THAT EVENTUALLY	
 		
 		//concat all the tokens together
 		char concatArgs[700]; 
@@ -109,14 +112,21 @@ int interpreter(char* command_args[], int args_size){
 	} else if (strcmp(command_args[0], "run")==0) {
 		if (args_size != 2) return badcommand();
 
-		printf("Frame Store Size = %d; ", FRAMESIZE);
-		printf("Variable Store Size = %d\n", VARMEMSIZE);
+		printf("Frame Store Size = %d; ", FRAME_SIZE);
+		printf("Variable Store Size = %d\n", VAR_S);
 
 		int errCode = 0;
+
 		errCode = run(command_args[1]);
-		resetmem();
+	
+		//CLEAR FRAME MEMORY
+		//resetmem();
 		resetmemframe();
+
+		//RESET PID TMP
 		PID_temp = 0;
+		head = NULL;
+		tail = NULL;
 		system("rm -rf ./backstore");
 		system("mkdir backstore");
 		return errCode;
@@ -141,8 +151,8 @@ int interpreter(char* command_args[], int args_size){
 			programs[i-1] = strdup(command_args[i]);
 		}
 
-		printf("Frame Store Size = %d", FRAMESIZE);
-		printf("Variable Store Size = %d", VARMEMSIZE);
+		printf("Frame Store Size = %d; ", FRAME_SIZE);
+		printf("Variable Store Size = %d\n", VAR_S);
 
 		//FILES CAN NOW HAVE THE SAME NAME
 
@@ -154,9 +164,16 @@ int interpreter(char* command_args[], int args_size){
 
 		int errCode = 0;
 		errCode = exec(programs, command_args[args_size-1], args_size-2);
-		resetmem();
+
+		//RESET MEM
+	    //	resetmem();
 		resetmemframe();
+
+		//RESET PCB
 		PID_temp=0;
+		head=NULL;
+		tail=NULL;
+		
 		system("rm -rf ./backstore");	
 		system("mkdir backstore");
 
@@ -215,15 +232,7 @@ int badcommandNoSuchPolicy(){
 }
 
 int set(char* var, char* value){
-
-	char *link = "=";
-	char buffer[1000];
-	strcpy(buffer, var);
-	strcat(buffer, link);
-	strcat(buffer, value);
-
 	mem_set_value(var, value);
-
 	return 0;
 
 }
@@ -263,10 +272,10 @@ int run(char* script){
 	int errCode = 0;
 	char line[1000]; //buffer for line
 	int size = 0; //size of program
-	struct dirent *dir;
 	FILE *p = NULL;
 	char t[100] = "cp ";
 	char w[100] = "backstore/prog";
+
 
 
 	//CHECK IF FILE EXIST
@@ -275,6 +284,7 @@ int run(char* script){
 		return badcommandFileDoesNotExist();
 	}
 	fclose(p);
+
 
 
 	//COPY FILE IN BACKSORE
@@ -288,10 +298,13 @@ int run(char* script){
 
 	system(t);
 
+
+	
 	//GET FILE FROME BACKSTORE
 	strcat(w, prognb);
 	strcat(w, ".txt");
 	p = fopen(w, "rt");
+	
 
 	//CHECK IF FILE IN BACKSTORE
 	if(p == NULL){
@@ -304,16 +317,19 @@ int run(char* script){
 	struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
 	head = pcb; //set head
 	tail = pcb; //set tail
+	
 
 	pcb->PC = 0;
+	pcb->currpage = 0;
 	pcb->next = NULL;
 	pcb->PID = PID_temp;
-	PID_temp++;
 	pcb->back = NULL;
+	PID_temp++;
 
 	int page = 0;
 
 	fgets(line,999,p);
+
 
 
 	while(1){
@@ -322,15 +338,11 @@ int run(char* script){
 			page++;
 		}
 
-		if(page > loadSize){
-			break;
+		if(page < loadSize){
+			mem_init_page_value(prognb, page, line);  //set line in corresponding page
 		}
 
-	
 
-		mem_init_page_value(prognb, page, line);  //set line in corresponding page
-
-	
 
 		size++; //increment size of program
 
@@ -352,6 +364,7 @@ int run(char* script){
 	fclose(p);
 
 	errCode = scheduler("FCFS");
+
 
 	return errCode;
 }
@@ -449,11 +462,9 @@ int exec(char* script[], char* policy, int nbr){
 				page++;
 			}
 
-			if(page > loadSize){
-				break;
+			if(page < loadSize){
+				mem_init_page_value(prognbrs[i], page, line);  //set line in corresponding page
 			}
-
-			mem_init_page_value(prognbrs[i], page, line);  //set line in corresponding page
 	
 			size++; //increment size of program
 
@@ -481,8 +492,11 @@ int exec(char* script[], char* policy, int nbr){
 	return errCode;
 }
 
-int PCB_clear(struct PCB* pcb){
+struct PCB* PCB_clear(struct PCB* pcb){
  //remove PCB from QUEUE
+
+ 
+ struct PCB *back = pcb->back;
 
  if(pcb->back != NULL){
 	 if(pcb->next != NULL){
@@ -507,4 +521,8 @@ int PCB_clear(struct PCB* pcb){
  if(tail == pcb){
 	 tail = pcb->next;
  }
+
+ free(pcb);
+
+ return back;
 }

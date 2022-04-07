@@ -14,8 +14,6 @@ int badcommandNoSuchPolicy();
 void sortQueueL();
 void sortQueueS();
 void decrement();
-struct PCB* findSmaller();
-void switchPlace(struct PCB* pcb);
 
 int scheduler(char *policy){
 	//choosing different policies
@@ -171,8 +169,7 @@ int SJF(){
 			tmp->PC += 1;
 		}
 		//clear pcb when pcb reaches the end
-		PCB_clear(tmp);
-		tmp = tmp->back;
+		tmp = PCB_clear(tmp);
 	}
 	return errCode;
 }
@@ -196,6 +193,7 @@ int RR(){
 				currpage++;
 				tmp->currpage = currpage;
 			}
+
 			
 			char* userInput = mem_get_page_value(prog, currpage, i%FRAME_L);
 
@@ -237,10 +235,10 @@ int RR(){
 		}
 		//clear tmp when tmp reaches the end
 		if(tmp->PC == (tmp->length)){
-			PCB_clear(tmp);
+			tmp = PCB_clear(tmp);
+		}else{
+		 tmp = tmp->back;
 		}
-
-		tmp = tmp->back;
 
 		if(tmp == NULL){
 			tmp = head;
@@ -326,6 +324,7 @@ int AGING(){
 		if(head->PC == (head->length)){
 			PCB_clear(head);
 		}
+
 		decrement();
 		sortQueueS();
 
@@ -336,6 +335,7 @@ int AGING(){
 int FCFS(){
 	int errCode = 0;
 	struct PCB* tmp = head;
+
 
 	while(tmp != NULL){
 		int index = tmp->PC;
@@ -391,8 +391,7 @@ int FCFS(){
 			tmp->PC += 1;
 		}
 		//clear tmp when tmp reaches the end
-		PCB_clear(tmp);
-		tmp = tmp->back;
+		tmp = PCB_clear(tmp);
 	}
 	return errCode;
 }

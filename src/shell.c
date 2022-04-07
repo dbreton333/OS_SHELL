@@ -88,7 +88,7 @@ int parseInput(char ui[]) {
 	while(ui[a] != '\0' && a<1000) {
 		
 		//get rid of spaces
-		for(a; ui[a]==' '; a++);
+		for(a; ui[a]==' ' && a<1000; a++);
 
 		for(b=0; ui[a]!='\0' && ui[a]!=' ' && ui[a] && a<1000; a++, b++)
 			tmp[b] = ui[a];						// extract a word

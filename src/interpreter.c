@@ -254,7 +254,8 @@ int run(char* script){
 	FILE *p = NULL;
 	char t[100] = "cp ";
 	char w[100] = "backstore/prog";
-	//char file[100] = "/home/2021/dbreto7/courses/ECSE427/OS_SHELL/src/backstore/";
+
+	printf("1");
 
 	//CHECK IF FILE EXIST
 	p = fopen(script,"rt");
@@ -262,6 +263,8 @@ int run(char* script){
 		return badcommandFileDoesNotExist();
 	}
 	fclose(p);
+
+	printf("2");
 
 	//COPY FILE IN BACKSORE
 	strcat(t, script);
@@ -272,12 +275,13 @@ int run(char* script){
 	strcat(t, prognb);
 	strcat(t, ".txt");
 
+	printf("3");
+
 	system(t);
 
-
+	//GET FILE FROME BACKSTORE
 	strcat(w, prognb);
 	strcat(w, ".txt");
-
 	p = fopen(w, "rt");
 
 	//CHECK IF FILE IN BACKSTORE
@@ -286,6 +290,8 @@ int run(char* script){
 		system("mkdir backstore");
 		return badcommandFileDoesNotExist();
 	}
+
+
 
 	struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
 	head = pcb; //set head
@@ -308,7 +314,11 @@ int run(char* script){
 			page++;
 		}
 
+		printf("5");
+
 		mem_set_page_value(prognb, page, line);  //set line in corresponding page
+
+		printf("6");
 
 		size++; //increment size of program
 
@@ -322,13 +332,18 @@ int run(char* script){
 	}
 
 	//set length of program to size
+	pcb->page = page;
 	pcb->length = size;
 	pcb->score = size;
 
 	//close file
 	fclose(p);
 
+	printf("7");
+
 	errCode = scheduler("FCFS");
+
+	printf("8");
 	return errCode;
 }
 
@@ -337,7 +352,6 @@ int exec(char* script[], char* policy, int nbr){
 
 	struct PCB *prev = NULL;
 	FILE *p = NULL;
-	struct dirent *dir;
 	char *prognbrs[nbr];
 	int Iprognbrs[nbr];
 
@@ -355,6 +369,7 @@ int exec(char* script[], char* policy, int nbr){
 		char t[100] = "cp ";
 		char w[] = "backstore/prog";
 
+		//COPY FILE IN BACKSTORE
 		strcat(t, script[i]);
 		strcat(t, " ");
 		strcat(t, w);
@@ -373,9 +388,9 @@ int exec(char* script[], char* policy, int nbr){
 
 	for (int i = 0 ; i < nbr; i++){
 
-		char file[100] = "backstore/";
+		//GET FILE FROM BACKSTORE
+		char file[100] = "backstore/prog";
 
-		strcat(file, "prog");
 		strcat(file, prognbrs[i]);
 		strcat(file, ".txt");
 		p = fopen(file,"rt");  // open file and p points to it

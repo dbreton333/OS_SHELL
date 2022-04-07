@@ -110,6 +110,9 @@ int interpreter(char* command_args[], int args_size){
 
 		int errCode = 0;
 		errCode = run(command_args[1]);
+		resetmem();
+		resetmemframe();
+		PID_temp = 0;
 		system("rm -rf ./backstore");
 		system("mkdir backstore");
 		return errCode;
@@ -144,6 +147,9 @@ int interpreter(char* command_args[], int args_size){
 
 		int errCode = 0;
 		errCode = exec(programs, command_args[args_size-1], args_size-2);
+		resetmem();
+		resetmemframe();
+		PID_temp=0;
 		system("rm -rf ./backstore");	
 		system("mkdir backstore");
 
@@ -255,7 +261,6 @@ int run(char* script){
 	char t[100] = "cp ";
 	char w[100] = "backstore/prog";
 
-	printf("1");
 
 	//CHECK IF FILE EXIST
 	p = fopen(script,"rt");
@@ -264,7 +269,6 @@ int run(char* script){
 	}
 	fclose(p);
 
-	printf("2");
 
 	//COPY FILE IN BACKSORE
 	strcat(t, script);
@@ -274,8 +278,6 @@ int run(char* script){
 	sprintf(prognb, "%d", PID_temp);
 	strcat(t, prognb);
 	strcat(t, ".txt");
-
-	printf("3");
 
 	system(t);
 
@@ -290,7 +292,6 @@ int run(char* script){
 		system("mkdir backstore");
 		return badcommandFileDoesNotExist();
 	}
-
 
 
 	struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
@@ -314,11 +315,11 @@ int run(char* script){
 			page++;
 		}
 
-		printf("5");
+	
 
-		mem_set_page_value(prognb, page, line);  //set line in corresponding page
+		mem_init_page_value(prognb, page, line);  //set line in corresponding page
 
-		printf("6");
+	
 
 		size++; //increment size of program
 
@@ -339,11 +340,8 @@ int run(char* script){
 	//close file
 	fclose(p);
 
-	printf("7");
-
 	errCode = scheduler("FCFS");
 
-	printf("8");
 	return errCode;
 }
 
@@ -440,7 +438,7 @@ int exec(char* script[], char* policy, int nbr){
 				page++;
 			}
 
-			mem_set_page_value(prognbrs[i], page, line);  //set line in corresponding page
+			mem_init_page_value(prognbrs[i], page, line);  //set line in corresponding page
 	
 			size++; //increment size of program
 

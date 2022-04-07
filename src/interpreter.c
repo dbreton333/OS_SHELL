@@ -109,6 +109,9 @@ int interpreter(char* command_args[], int args_size){
 	} else if (strcmp(command_args[0], "run")==0) {
 		if (args_size != 2) return badcommand();
 
+		printf("Frame Store Size = %d; ", FRAMESIZE);
+		printf("Variable Store Size = %d\n", VARMEMSIZE);
+
 		int errCode = 0;
 		errCode = run(command_args[1]);
 		resetmem();
@@ -137,6 +140,9 @@ int interpreter(char* command_args[], int args_size){
 		for(int i = 1 ; i < args_size - 1 ; i++){
 			programs[i-1] = strdup(command_args[i]);
 		}
+
+		printf("Frame Store Size = %d", FRAMESIZE);
+		printf("Variable Store Size = %d", VARMEMSIZE);
 
 		//FILES CAN NOW HAVE THE SAME NAME
 

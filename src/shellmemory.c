@@ -3,11 +3,7 @@
 #include<stdio.h>
 #include "shellmemory.h"
 
-
-
-#define SHELL_MEM_LENGTH 1000
-
-static const int TABLE_S = 1000;
+static const int TABLE_S = 100;
 
 struct memory_struct{ //var memory
 	char *var;
@@ -27,9 +23,9 @@ struct page_table_struct{ //page table -> maps virtual page to physical page
 	  int frameno; 
 };
 
-struct frame_struct f_store[1000];
-struct memory_struct shellmemory[1000];
-struct page_table_struct pagetable[1000];
+struct frame_struct f_store[FRAMESIZE/3];
+struct memory_struct shellmemory[VARMEMSIZE];
+struct page_table_struct pagetable[100];
 
 
 // Helper functions
@@ -54,9 +50,13 @@ char *extract(char *model) {
 	return strdup(value);
 }
 
+/*******************************
+ 
 
-// Shell memory functions
+     Shell memory functions
 
+
+*******************************/
 
 //inits the memory for the three arrays
 void mem_init(){ 
@@ -129,7 +129,7 @@ void mem_clear(char *var_in){
 	}
 }
 
-//get value based on input key
+//get value based on variable name
 char *mem_get_value(char *var_in) {
 	int i;
 
@@ -189,8 +189,8 @@ void mem_set_frame_value(int frameno, char* value_in) {
 	}
 }
 
-//get available frame index and set page table
-int mem_get_frame_number(char *prog, int page) {
+//get available frame index and set page table, if no more space returns -1
+int mem_get_frame_number_setup(char *prog, int page) {
 
 	int frame = mem_get_table_value(prog,page);
 
@@ -199,11 +199,10 @@ int mem_get_frame_number(char *prog, int page) {
 		char pagestr[2];
 		sprintf(pagestr, "%d", page);
 
-	 	frame = mem_get_new_frame(pagestr);
+	 	frame = mem_get_new_frame();
 		if(frame != -1){ //no more space in f_store
 	 		mem_set_page_table(prog, page, frame);
-		}
-		 
+		}	 
 	}
 
 	return frame;
@@ -224,42 +223,67 @@ int mem_get_table_value(char *prog, int page){
 	return frame;
 }
 
-//set frame value 
+//set frame value when loading programs
 int mem_init_page_value(char *prog, int page, char *value_in){ 
-	int frame = mem_get_frame_number(prog, page);
+	int frame = mem_get_frame_number_setup(prog, page);
 	if(frame != -1){ //if frame == -1 mean no more space in f_Store
 		mem_set_frame_value(frame, value_in);
 	}
-	return frame;
+	return frame; //return -1 in no more space in f_store
 }
 
-int mem_get_new_frame(char* page){ //Gets first empty frame
+//get empty frame, return -1 if none
+int mem_get_new_frame(){
 
-	//eventually if EMPTY will check for most recent
 	int frameno = -1;
 	for (int frametmp = 0; frametmp<FRAME_S; frametmp++){
 		if (strcmp(f_store[frametmp].frame, "none") == 0){
 			f_store[frametmp].frame = strdup("full");
 			frameno = frametmp;
-			break; //returm frame index
+			break; 
 		} 
 	}
 	return frameno;
 }
 
+//get the value at a specific line in a frame
 char *mem_get_frame_value(int frameno,int line) {
 	return strdup(f_store[frameno].values[line]);
 }
 
+//get a page value by getting the frame index and then frame value
 char *mem_get_page_value(char* prog, int page, int line){
 	int frame = mem_get_table_value(prog,page);
 	if(frame == -1){
-		return strdup("”Page fault! Victim page contents:");
+		printf("”Page fault! Victim page contents:");
+		frame = mem_page_fault(prog, page, line);
 	}
 	return mem_get_frame_value(frame,line);
 }
 
 
+//print line of frame and evict
+int mem_evict_frame(){
+	return 0;
+}
+
+int mem_page_fault(char* prog, int page, int line){
+	char pagestr[2];
+	sprintf(pagestr, "%d", page);
+	int frame = mem_get_new_frame(pagestr);
+	if(frame == -1){
+		frame = mem_evict_frame();
+	}
+	mem_get_and_save_page_from_backstore(prog, page);
+	mem_set_page_table(prog,page,frame);
+	return frame;
+}
+
+char* mem_get_and_save_page_from_backstore(char* prog,int page){
+	return "none";
+}
+
+//set table page number, frame number  and program number
 void mem_set_page_table(char *prog, int page, int frame) {
 	int i;
 	for (i=0; i<TABLE_S; i++){

@@ -8,7 +8,6 @@ static const int TABLE_S = 100;
 struct memory_struct{ //var memory
 	char *var;
 	char *value;
-
 };
 
 struct frame_struct{ //physical page memory
@@ -50,14 +49,6 @@ char *extract(char *model) {
 	return strdup(value);
 }
 
-/*******************************
- 
-
-     Shell memory functions
-
-
-*******************************/
-
 //inits the memory for the three arrays
 void mem_init(){ 
 	int i;
@@ -87,6 +78,13 @@ void mem_init(){
 	}
 }
 
+/*******************************
+ 
+
+     Var Shell memory memory functions
+
+
+*******************************/
 
 void resetmem(){ // reset var memory
 	for(int i=0 ; i < VAR_S ; i++ ){
@@ -141,6 +139,14 @@ char *mem_get_value(char *var_in) {
 	return "Variable does not exist";
 
 }
+
+/*******************************
+ 
+
+     FRame Shell memory memory functions
+
+
+*******************************/
 
 //reset physical page memory
 void resetmemframe(){
@@ -210,6 +216,8 @@ int mem_get_frame_number_setup(char *prog, int page) {
 
 //get table value with page number and program number
 int mem_get_table_value(char *prog, int page){
+	printf("program: %s\n", prog);
+	printf("page: %d\n", page);
 	int i;
 	int frame = -1;
 	for (i=0; i<TABLE_S; i++){
@@ -254,9 +262,13 @@ char *mem_get_frame_value(int frameno,int line) {
 //get a page value by getting the frame index and then frame value
 char *mem_get_page_value(char* prog, int page, int line){
 
+	
 	int frame = mem_get_table_value(prog,page);
 	if(frame == -1){
-		printf("Page fault! Victim page contents:\n");
+		printf("program: %s\n", prog);
+		printf("Not in Table: %d\n",frame);
+	}
+	if(frame == -1){
 		frame = mem_page_fault(prog, page, line);
 		return "break";
 	}else{
@@ -280,14 +292,15 @@ char *mem_get_page_value(char* prog, int page, int line){
 //print line of frame and evict
 int mem_evict_frame(){
 	int frame = LRU->frameno;
-	LRU = LRU->back;
+	if(LRU->back != NULL){
+		LRU = LRU->back;
+	}
 	for(int i = 0; i<FRAME_L; i++){
 		char* str = mem_get_frame_value(frame,i);
 		if(strcmp(str,"none") != 0){
 			printf("%s", str);
 		}
 	}
-	printf("End of victim page contents.\n");
 
 	mem_clear_frame(frame);
 
@@ -299,7 +312,12 @@ int mem_page_fault(char* prog, int page, int line){
 
 	int frame = mem_get_new_frame();
 	if(frame == -1){
+		printf("new_frame_fault: %d\n",frame);
+	}
+	if(frame == -1){
+		printf("Page fault! Victim page contents:\n");
 		frame = mem_evict_frame();
+		printf("End of victim page contents.\n");
 	}
 	mem_get_and_save_page_from_backstore(frame, prog, page);
 	mem_set_page_table(prog,page,frame);
@@ -314,12 +332,15 @@ void mem_get_and_save_page_from_backstore(int frame,char* prog,int page){
 	strcat(w, ".txt");
 	p = fopen(w, "rt");
 	int i;
+
 	for(i=0; i<(page+1)*FRAME_L; i++){
 		fgets(line,999,p);
 	}
 
 		while(1){
 			fgets(line,999,p);
+
+			printf("Line save in mem: %s\n",line);
 
 			mem_set_frame_value(frame, line);
 

@@ -494,7 +494,6 @@ int exec(char* script[], char* policy, int nbr){
 
 struct PCB* PCB_clear(struct PCB* pcb){
  //remove PCB from QUEUE
-
  
  struct PCB *back = pcb->back;
 

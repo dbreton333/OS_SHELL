@@ -185,6 +185,8 @@ int RR(){
 		int currpage = tmp->currpage;
 		//looping through each program and running two instructions per program
 		for (int i = index; (i < index + 2) && (i < (tmp->length)); i++){
+
+			int changed = 0;
 			
 			char prog[4];	
 			sprintf(prog,"%d",PID);
@@ -192,10 +194,20 @@ int RR(){
 			if((i % FRAME_L == 0) && (i != 0)){
 				currpage++;
 				tmp->currpage = currpage;
+				changed = 1;
 			}
 
 			
 			char* userInput = mem_get_page_value(prog, currpage, i%FRAME_L);
+			if(strcmp(userInput,"break") == 0){
+				if(changed = 1){
+					currpage--;
+					tmp->currpage = currpage;
+				}
+
+				printf("break\n");
+				break;
+			}
 
 			char* token;
 			char** liToken =  malloc(10 * sizeof(char*));;

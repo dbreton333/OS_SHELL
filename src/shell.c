@@ -13,6 +13,9 @@ int parseInput(char ui[]);
 // Start of everything
 int main(int argc, char *argv[]) {
 
+	system("rm -rf ./backstore");	
+	system("mkdir backstore");
+
 	printf("%s\n", "Shell version 1.1 Created January 2022");
 	help();
 
@@ -85,7 +88,7 @@ int parseInput(char ui[]) {
 	while(ui[a] != '\0' && a<1000) {
 		
 		//get rid of spaces
-		for(a; ui[a]==' '; a++);
+		for(a; ui[a]==' ' && a<1000; a++);
 
 		for(b=0; ui[a]!='\0' && ui[a]!=' ' && ui[a] && a<1000; a++, b++)
 			tmp[b] = ui[a];						// extract a word

@@ -1,6 +1,6 @@
 #!/bin/bash
 make clean
-make mysh
+make mysh framesize=1000 varmemsize=1000
 
 if [[ $1 == 1 ]] 
 then

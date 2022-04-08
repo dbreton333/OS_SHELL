@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> 
+#include <dirent.h>
 
 
 #include "interpreter.h"
@@ -26,11 +27,12 @@ int badcommandNoSuchPolicy();
 int badcommandSameFileName();
 int scheduler(char *policy);
 int badcommandTooManyTokens();
-int PCB_clear(struct PCB* pcb);
+struct PCB* PCB_clear(struct PCB* pcb);
 int echo(char* var);
 int my_ls();
 int exec(char* script[], char* policy, int len);
 int PID_temp = 0;
+int loadSize = 2;
 
 // Interpret commands and their arguments
 int interpreter(char* command_args[], int args_size){
@@ -76,18 +78,21 @@ int interpreter(char* command_args[], int args_size){
 		if (args_size < 3) return badcommand(); //if the variable is set to nothing
 		char tmp[16];
 		sscanf(command_args[1],"%s", tmp);
+
+		//NO NEED TO CHECK IF VAR IS A DIGIT ANYMORE
 		//check if variable is an integer
-		int isDigit = 1;
-		int j=0;
+		// int isDigit = 1;
+		// int j=0;
 
-		while(j<strlen(tmp) && isDigit == 1){
-			if(tmp[j] <= '0' || tmp[j] >='9'){
-				isDigit = 0;
-			}
-			j++;
-		}
+		// while(j<strlen(tmp) && isDigit == 0){
+		// 	if(tmp[j] <= '0' || tmp[j] >='9'){
+		// 		isDigit = 1;
+		// 	}
+		// 	j++;
+		// }
 
-		if(isDigit == 1) return badcommandDigitVariable();			
+
+		//if(isDigit == 1) return badcommandDigitVariable();	//CAN DELETE THAT EVENTUALLY	
 		
 		//concat all the tokens together
 		char concatArgs[700]; 
@@ -106,7 +111,26 @@ int interpreter(char* command_args[], int args_size){
 	
 	} else if (strcmp(command_args[0], "run")==0) {
 		if (args_size != 2) return badcommand();
-		return run(command_args[1]);
+
+		printf("Frame Store Size = %d; ", FRAME_SIZE);
+		printf("Variable Store Size = %d\n", VAR_S);
+
+		int errCode = 0;
+
+		errCode = run(command_args[1]);
+	
+		//CLEAR FRAME MEMORY
+		//resetmem();
+		resetmemframe();
+
+		//RESET PID TMP
+		PID_temp = 0;
+		head = NULL;
+		tail = NULL;
+
+		system("rm -rf ./backstore");
+		system("mkdir backstore");
+		return errCode;
 	
 	} else if (strcmp(command_args[0], "echo")==0) {
 		
@@ -121,7 +145,6 @@ int interpreter(char* command_args[], int args_size){
 	} else if (strcmp(command_args[0], "exec")==0) {
 	
 		if (args_size > 5) return badcommand();
-		
 		char *programs[args_size-2];
 
 
@@ -129,12 +152,33 @@ int interpreter(char* command_args[], int args_size){
 			programs[i-1] = strdup(command_args[i]);
 		}
 
-		for(int i = 0 ; i < args_size - 2 ; i++){
-			if((i+1<args_size - 2 && (strcmp(programs[i],programs[i+1]) == 0)) || (i+2< args_size - 2 && (strcmp(programs[i],programs[i+2]) == 0 ))){
-				return badcommandSameFileName();
-			}
-		}
-		return exec(programs, command_args[args_size-1], args_size-2);
+		printf("Frame Store Size = %d; ", FRAME_SIZE);
+		printf("Variable Store Size = %d\n", VAR_S);
+
+		//FILES CAN NOW HAVE THE SAME NAME
+
+		// for(int i = 0 ; i < args_size - 2 ; i++){
+		// 	if((i+1<args_size - 2 && (strcmp(programs[i],programs[i+1]) == 0)) || (i+2< args_size - 2 && (strcmp(programs[i],programs[i+2]) == 0 ))){
+		// 		return badcommandSameFileName();
+		// 	}
+		// }
+
+		int errCode = 0;
+		errCode = exec(programs, command_args[args_size-1], args_size-2);
+
+		//RESET MEM
+	    //	resetmem();
+		resetmemframe();
+
+		//RESET PCB
+		PID_temp=0;
+		head=NULL;
+		tail=NULL;
+		
+		system("rm -rf ./backstore");	
+		system("mkdir backstore");
+
+		return errCode;
 	}
 	else return badcommand();
 }
@@ -152,6 +196,9 @@ run SCRIPT.TXT		Executes the file SCRIPT.TXT\n ";
 }
 
 int quit(){
+
+	system("rm -rf ./backstore");
+	
 	printf("%s\n", "Bye!");
 	exit(0);
 }
@@ -186,15 +233,7 @@ int badcommandNoSuchPolicy(){
 }
 
 int set(char* var, char* value){
-
-	char *link = "=";
-	char buffer[1000];
-	strcpy(buffer, var);
-	strcat(buffer, link);
-	strcat(buffer, value);
-
 	mem_set_value(var, value);
-
 	return 0;
 
 }
@@ -229,38 +268,85 @@ int my_ls(){
 }
 
 int run(char* script){
-	int errCode = 0;
 
+	//INITIALISE
+	int errCode = 0;
 	char line[1000]; //buffer for line
-	int var = 0; //line number
 	int size = 0; //size of program
-	FILE *p = fopen(script,"rt");  // open file and p points to it
+	FILE *p = NULL;
+	char t[100] = "cp ";
+	char w[100] = "backstore/prog";
+
+
+
+	//CHECK IF FILE EXIST
+	p = fopen(script,"rt");
+	if(p == NULL){
+		system("rm -rf ./backstore");	
+		system("mkdir backstore");
+		return badcommandFileDoesNotExist();
+	}
+	fclose(p);
+
+
+
+	//COPY FILE IN BACKSORE
+	strcat(t, script);
+	strcat(t, " ");
+	strcat(t, w);
+	char prognb[2];
+	sprintf(prognb, "%d", PID_temp);
+	strcat(t, prognb);
+	strcat(t, ".txt");
+
+	system(t);
+
+
+	
+	//GET FILE FROME BACKSTORE
+	strcat(w, prognb);
+	strcat(w, ".txt");
+	p = fopen(w, "rt");
+	
+
+	//CHECK IF FILE IN BACKSTORE
+	if(p == NULL){
+		system("rm -rf ./backstore");	
+		system("mkdir backstore");
+		return badcommandFileDoesNotExist();
+	}
+
 
 	struct PCB *pcb = (struct PCB*) malloc(sizeof(struct PCB)); //create pcb for the file
 	head = pcb; //set head
 	tail = pcb; //set tail
+	
 
-	if(p == NULL){
-		return badcommandFileDoesNotExist();
-	}
-
-	pcb->base = var;
-	pcb->PC = var;
+	pcb->PC = 0;
+	pcb->currpage = 0;
 	pcb->next = NULL;
 	pcb->PID = PID_temp;
-	PID_temp++;
 	pcb->back = NULL;
+	PID_temp++;
+
+	int page = 0;
 
 	fgets(line,999,p);
 
+
+
 	while(1){
 
-		char buffer[4]; //string buffer for integer conversion
-		sprintf(buffer,"%d",var); //copy integer as a string ex: 1 -> "1"
+		if(((size % FRAME_L) == 0) && (size != 0)){
+			page++;
+		}
 
-		set(buffer, line); //set line to line number as variable
-	
-		var++; //increment line number
+		if(page < loadSize){
+			mem_init_page_value(prognb, page, line);  //set line in corresponding page
+		}
+
+
+
 		size++; //increment size of program
 
 		//if end of file break
@@ -274,25 +360,73 @@ int run(char* script){
 
 	//set length of program to size
 	pcb->length = size;
-	pcb->score =size;
+	pcb->score = size;
 
 	//close file
 	fclose(p);
 
 	errCode = scheduler("FCFS");
+
+
+	return errCode;
 }
+
 int exec(char* script[], char* policy, int nbr){
 	int errCode = 0;
-	int var = 0; //line number
+
 	struct PCB *prev = NULL;
+	FILE *p = NULL;
+	char *prognbrs[nbr];
+	int Iprognbrs[nbr];
+
+
 	
 	for (int i = 0 ; i < nbr; i++){
 
-		FILE *p = fopen(script[i],"rt");  // open file and p points to it
+		//CHECK IF FILE EXIST
+		p = fopen(script[i],"rt");
+		if(p == NULL){
+			system("rm -rf ./backstore");	
+			system("mkdir backstore");
+			return badcommandFileDoesNotExist();
+		}
+		fclose(p);
+
+		char t[100] = "cp ";
+		char w[] = "backstore/prog";
+
+		//COPY FILE IN BACKSTORE
+		strcat(t, script[i]);
+		strcat(t, " ");
+		strcat(t, w);
+		char prognb[2];
+
+		sprintf(prognb, "%d", PID_temp);
+		prognbrs[i] = strdup(prognb);
+		Iprognbrs[i] = PID_temp;
+		PID_temp++;
+		strcat(t, prognb);
+		strcat(t, ".txt");
+
+		system(t);
+
+	}
+
+	for (int i = 0 ; i < nbr; i++){
+
+		//GET FILE FROM BACKSTORE
+		char file[100] = "backstore/prog";
+
+		strcat(file, prognbrs[i]);
+		strcat(file, ".txt");
+		p = fopen(file,"rt");  // open file and p points to it
 
 		if(p == NULL){
-				return badcommandFileDoesNotExist();
+			system("rm -rf ./backstore");	
+			system("mkdir backstore");
+			return badcommandFileDoesNotExist();
 		}
+
 
 		int size = 0; //size of program
 		char line[1000]; //buffer for line
@@ -303,38 +437,42 @@ int exec(char* script[], char* policy, int nbr){
 			head = pcb; //set head
 			tail = pcb; //set tail
 
-			pcb->base = var;
-			pcb->PC = var;
+			pcb->PC = 0;
+			pcb->currpage = 0;
 			pcb->next = NULL;
-			pcb->PID = PID_temp;
-			PID_temp++;
+			pcb->PID = Iprognbrs[i];
 			pcb->back = NULL;
 			prev = pcb ;
 		}
 		else{ 
 			tail = pcb ;
 
-			pcb->base = var;
-			pcb->PC = var;
+			pcb->PC = 0;
+			pcb->currpage = 0;
 			pcb->next = prev;
-			pcb->PID = PID_temp;
-			PID_temp++;
+			pcb->PID = Iprognbrs[i];
 			pcb->back = NULL;
 			prev->back = pcb;
 			prev = pcb;
 		}
 
+		int page = 0;
+
 		fgets(line,999,p);
 
 		while(1){
 
-			char buffer[4]; //string buffer for integer conversion
-			sprintf(buffer,"%d",var); //copy integer as a string ex: 1 -> "1"
+			if(((size % FRAME_L) == 0) && (size != 0)){
+				page++;
+			}
 
-			set(buffer, line); //set line to line number as variable
-		
-			var++; //increment line number
+			if(page < loadSize){
+				mem_init_page_value(prognbrs[i], page, line);  //set line in corresponding page
+			}
+	
 			size++; //increment size of program
+
+
 
 			//if end of file break
 			if(feof(p)){
@@ -357,14 +495,10 @@ int exec(char* script[], char* policy, int nbr){
 	return errCode;
 }
 
-int PCB_clear(struct PCB* pcb){
- //clear the PCB in the shell memory
+struct PCB* PCB_clear(struct PCB* pcb){
  //remove PCB from QUEUE
- char index[4];	
- for(int i = pcb->base; i < pcb->length; i++){
-	sprintf(index,"%d",i);
-	mem_clear(index);
- }
+ 
+ struct PCB *back = pcb->back;
 
  if(pcb->back != NULL){
 	 if(pcb->next != NULL){
@@ -389,4 +523,8 @@ int PCB_clear(struct PCB* pcb){
  if(tail == pcb){
 	 tail = pcb->next;
  }
+
+ free(pcb);
+
+ return back;
 }

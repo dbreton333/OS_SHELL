@@ -14,8 +14,6 @@ int badcommandNoSuchPolicy();
 void sortQueueL();
 void sortQueueS();
 void decrement();
-struct PCB* findSmaller();
-void switchPlace(struct PCB* pcb);
 
 int scheduler(char *policy){
 	//choosing different policies
@@ -118,11 +116,31 @@ int SJF(){
 	while (tmp != NULL){
 		
 		int index = tmp->PC;
+		int PID = tmp->PID;
+		int currpage = tmp->currpage;
 		//looping through each program
-		for (int i = index; i < (tmp->length + tmp->base); i++){
-			char index[4];	
-			sprintf(index,"%d",i);
-			char* userInput = mem_get_value(index);
+		char prog[4];	
+		sprintf(prog,"%d",PID);
+
+		for (int i = index; i < (tmp->length); i++){
+
+			int changed = 0;
+
+			if((i % FRAME_L == 0) && (i != 0)){
+				currpage++;
+				tmp->currpage = currpage;
+			}
+			
+			char* userInput = mem_get_page_value(prog, currpage, i%FRAME_L);
+			if(strcmp(userInput,"break") == 0){
+				if(changed == 1){
+					currpage--;
+					tmp->currpage = currpage;
+				}
+				break;
+			}
+
+
 			char* token;
 			char** liToken =  malloc(10 * sizeof(char*));;
 			int k = 0;
@@ -160,25 +178,49 @@ int SJF(){
 			tmp->PC += 1;
 		}
 		//clear pcb when pcb reaches the end
-		PCB_clear(tmp);
-		tmp = tmp->back;
+		tmp = PCB_clear(tmp);
+
+		if(tmp == NULL){
+			tmp = head;
+		}
 	}
 	return errCode;
 }
 
 int RR(){
 	int errCode = 0;
-	struct PCB* pcb = head;
+	struct PCB* tmp = head;
 
 	while(head != NULL){
-		int index = pcb->PC;
+
+		int index = tmp->PC;
+		int PID = tmp->PID;
+		int currpage = tmp->currpage;
+
 		//looping through each program and running two instructions per program
-		for (int i = index; (i < index + 2) && (i < (pcb->length + pcb->base)); i++){
+		for (int i = index; (i < index + 2) && (i < (tmp->length)); i++){
+
+			int changed = 0;
 			
-			char index[4];	
-			sprintf(index,"%d",i);
+			char prog[4];	
+			sprintf(prog,"%d",PID);
+
+			if((i % FRAME_L == 0) && (i != 0)){
+				currpage++;
+				tmp->currpage = currpage;
+				changed = 1;
+			}
+
 			
-			char* userInput = mem_get_value(index);
+			char* userInput = mem_get_page_value(prog, currpage, i%FRAME_L);
+			if(strcmp(userInput,"break") == 0){
+				if(changed == 1){
+					currpage--;
+					tmp->currpage = currpage;
+				}
+				break;
+			}
+
 			char* token;
 			char** liToken =  malloc(10 * sizeof(char*));;
 			int k = 0;
@@ -213,16 +255,17 @@ int RR(){
 			}
 			free(liToken);
 
-			pcb->PC += 1;
+			tmp->PC += 1;
 		}
-		//clear pcb when pcb reaches the end
-		if(pcb->PC == (pcb->length + pcb->base)){
-			PCB_clear(pcb);
+		//clear tmp when tmp reaches the end
+		if(tmp->PC == (tmp->length)){
+			tmp = PCB_clear(tmp);
+		}else{
+		 tmp = tmp->back;
 		}
-		pcb = pcb->back;
 
-		if(pcb == NULL){
-			pcb = head;
+		if(tmp == NULL){
+			tmp = head;
 		}
 	}
 	return errCode;
@@ -249,9 +292,31 @@ int AGING(){
 	
 	while(head != NULL){
 
-		char index[4];	
-		sprintf(index,"%d",head->PC);
-		char* userInput = mem_get_value(index);
+		struct PCB* tmp = head;
+		int index = tmp->PC;
+		int PID = tmp->PID;
+		int currpage = tmp->currpage;
+		int changed = 0;
+		
+
+		char prog[4];	
+		sprintf(prog,"%d",PID);
+
+		if((index % FRAME_L == 0) && (index != 0)){
+			currpage++;
+			tmp->currpage = currpage;
+		}
+
+			
+		char* userInput = mem_get_page_value(prog, currpage, index%FRAME_L);
+		if(strcmp(userInput,"break") == 0){
+			if(changed == 1){
+				currpage--;
+				tmp->currpage = currpage;
+			}
+			break;
+		}
+
 		char* token;
 		char** liToken =  malloc(10 * sizeof(char*));;
 		int k = 0;
@@ -289,9 +354,10 @@ int AGING(){
 		free(liToken);
 		head->PC += 1;
 
-		if(head->PC == (head->length + head->base)){
+		if(head->PC == (head->length)){
 			PCB_clear(head);
 		}
+
 		decrement();
 		sortQueueS();
 
@@ -301,17 +367,36 @@ int AGING(){
 
 int FCFS(){
 	int errCode = 0;
-	struct PCB* pcb = head;
+	struct PCB* tmp = head;
 
-	while(pcb != NULL){
-		int index = pcb->PC;
-		//looping through each program 
-		for (int i = index; i < (pcb->length + pcb->base); i++){
-	
-			char index[4];	
-			sprintf(index,"%d",i);
+
+	while(tmp != NULL){
+
+		int index = tmp->PC;
+		int PID = tmp->PID;
+		int currpage = tmp->currpage;
+		//looping through each program
+		for (int i = index; i < (tmp->length); i++){
 			
-			char* userInput = mem_get_value(index);
+			char prog[4];	
+			sprintf(prog,"%d",PID);
+			int changed = 0;
+
+			if((i % FRAME_L == 0) && (i != 0)){
+				currpage++;
+				tmp->currpage = currpage;
+			}
+			
+			char* userInput = mem_get_page_value(prog, currpage, i%FRAME_L);
+			if(strcmp(userInput,"break") == 0){
+				if(changed == 1){
+					currpage--;
+					tmp->currpage = currpage;
+				}
+				break;
+			}
+
+			
 			char* token;
 			char** liToken =  malloc(10 * sizeof(char*));;
 			int k = 0;
@@ -345,11 +430,15 @@ int FCFS(){
 				memset(userInput, 0, sizeof(userInput));	
 			}
 			free(liToken);
-			pcb->PC += 1;
+			tmp->PC += 1;
 		}
-		//clear pcb when pcb reaches the end
-		PCB_clear(pcb);
-		pcb = pcb->back;
+		//clear tmp when tmp reaches the end
+		if(head->PC == (head->length)){
+			tmp = PCB_clear(head);
+		}else{
+			tmp = tmp->back;
+		}
+
 	}
 	return errCode;
 }

@@ -3,8 +3,8 @@ int help();
 
 struct PCB {
 	int PID;
-	int base;
 	int PC;
+	int currpage;
 	int length;
 	int score;
 	struct PCB *next;
@@ -14,4 +14,4 @@ struct PCB {
 struct PCB *head;
 struct PCB *tail;
 
-int PCB_clear(struct PCB* pcb);
+struct PCB* PCB_clear(struct PCB* pcb);

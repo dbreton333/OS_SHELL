@@ -124,12 +124,21 @@ int SJF(){
 
 		for (int i = index; i < (tmp->length); i++){
 
+			int changed = 0;
+
 			if((i % FRAME_L == 0) && (i != 0)){
 				currpage++;
 				tmp->currpage = currpage;
 			}
 			
 			char* userInput = mem_get_page_value(prog, currpage, i%FRAME_L);
+			if(strcmp(userInput,"break") == 0){
+				if(changed == 1){
+					currpage--;
+					tmp->currpage = currpage;
+				}
+				break;
+			}
 
 
 			char* token;
@@ -170,6 +179,10 @@ int SJF(){
 		}
 		//clear pcb when pcb reaches the end
 		tmp = PCB_clear(tmp);
+
+		if(tmp == NULL){
+			tmp = head;
+		}
 	}
 	return errCode;
 }
@@ -183,6 +196,7 @@ int RR(){
 		int index = tmp->PC;
 		int PID = tmp->PID;
 		int currpage = tmp->currpage;
+
 		//looping through each program and running two instructions per program
 		for (int i = index; (i < index + 2) && (i < (tmp->length)); i++){
 
@@ -200,12 +214,10 @@ int RR(){
 			
 			char* userInput = mem_get_page_value(prog, currpage, i%FRAME_L);
 			if(strcmp(userInput,"break") == 0){
-				if(changed = 1){
+				if(changed == 1){
 					currpage--;
 					tmp->currpage = currpage;
 				}
-
-				printf("break\n");
 				break;
 			}
 
@@ -284,6 +296,7 @@ int AGING(){
 		int index = tmp->PC;
 		int PID = tmp->PID;
 		int currpage = tmp->currpage;
+		int changed = 0;
 		
 
 		char prog[4];	
@@ -294,7 +307,15 @@ int AGING(){
 			tmp->currpage = currpage;
 		}
 
-		char* userInput = mem_get_page_value(prog,currpage,index%FRAME_L);
+			
+		char* userInput = mem_get_page_value(prog, currpage, index%FRAME_L);
+		if(strcmp(userInput,"break") == 0){
+			if(changed == 1){
+				currpage--;
+				tmp->currpage = currpage;
+			}
+			break;
+		}
 
 		char* token;
 		char** liToken =  malloc(10 * sizeof(char*));;
@@ -350,6 +371,7 @@ int FCFS(){
 
 
 	while(tmp != NULL){
+
 		int index = tmp->PC;
 		int PID = tmp->PID;
 		int currpage = tmp->currpage;
@@ -358,6 +380,7 @@ int FCFS(){
 			
 			char prog[4];	
 			sprintf(prog,"%d",PID);
+			int changed = 0;
 
 			if((i % FRAME_L == 0) && (i != 0)){
 				currpage++;
@@ -365,6 +388,13 @@ int FCFS(){
 			}
 			
 			char* userInput = mem_get_page_value(prog, currpage, i%FRAME_L);
+			if(strcmp(userInput,"break") == 0){
+				if(changed == 1){
+					currpage--;
+					tmp->currpage = currpage;
+				}
+				break;
+			}
 
 			
 			char* token;
@@ -403,7 +433,12 @@ int FCFS(){
 			tmp->PC += 1;
 		}
 		//clear tmp when tmp reaches the end
-		tmp = PCB_clear(tmp);
+		if(head->PC == (head->length)){
+			tmp = PCB_clear(head);
+		}else{
+			tmp = tmp->back;
+		}
+
 	}
 	return errCode;
 }

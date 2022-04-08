@@ -127,6 +127,7 @@ int interpreter(char* command_args[], int args_size){
 		PID_temp = 0;
 		head = NULL;
 		tail = NULL;
+
 		system("rm -rf ./backstore");
 		system("mkdir backstore");
 		return errCode;
@@ -281,6 +282,8 @@ int run(char* script){
 	//CHECK IF FILE EXIST
 	p = fopen(script,"rt");
 	if(p == NULL){
+		system("rm -rf ./backstore");	
+		system("mkdir backstore");
 		return badcommandFileDoesNotExist();
 	}
 	fclose(p);
@@ -356,7 +359,6 @@ int run(char* script){
 	}
 
 	//set length of program to size
-	pcb->page = page;
 	pcb->length = size;
 	pcb->score = size;
 
@@ -384,6 +386,8 @@ int exec(char* script[], char* policy, int nbr){
 		//CHECK IF FILE EXIST
 		p = fopen(script[i],"rt");
 		if(p == NULL){
+			system("rm -rf ./backstore");	
+			system("mkdir backstore");
 			return badcommandFileDoesNotExist();
 		}
 		fclose(p);
@@ -480,7 +484,6 @@ int exec(char* script[], char* policy, int nbr){
 		}
 
 		//set length of program to size
-		pcb->page = page;
 		pcb->length = size;
 		pcb->score = size;
 

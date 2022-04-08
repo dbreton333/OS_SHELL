@@ -4,7 +4,6 @@ int help();
 struct PCB {
 	int PID;
 	int PC;
-	int page;
 	int currpage;
 	int length;
 	int score;

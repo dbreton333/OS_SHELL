@@ -26,6 +26,8 @@ static const int VAR_S = VARMEMSIZE;
 
 struct frames {
 	int frameno;
+	char *prog;
+	int page;
 	struct frames *back;
 };
 

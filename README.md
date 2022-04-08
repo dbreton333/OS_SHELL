@@ -5,7 +5,7 @@
 | Name          | Major                       |Mcgill code| Year |
 |:-------------:|:---------------------------:|:---------:|:----:|
 |David Breton   | Computer Engineering        |260986087  |2nd   |
-|Tsemach Gozlan | Computer Science and Math   |260987791  |2nd   |
+|Tsemach Gozlan | Computer Science & Math   |260987791  |2nd   |
 
 
 ### OS_SHELL
